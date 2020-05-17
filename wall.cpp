@@ -1,5 +1,9 @@
 #include "wall.h"
+#include <typeinfo>
+#include <QDebug>
 
-Wall::Wall() {
+Wall::Wall(short x, short y) {
 
+    setRect(0, 0, width, height);
+    setPos(x - width/2, y - height/2);
 }

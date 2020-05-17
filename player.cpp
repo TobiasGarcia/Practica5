@@ -3,20 +3,22 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QDebug>
+#include <typeinfo>
+#include "wall.h"
 
-Player::Player(short scene_w,short scene_h) {
+Player::Player(short x,short y) {
 
-    short width = 100, height = 100;
-    setRect(scene_w/2 - width/2, scene_h/2 - height/2, 100, 100);
+    setRect(0, 0, width, height);
+    setPos(x - width/2, y - height/2);
 
     move_dir.fill(false);
 
     QTimer *timer = new QTimer;
     connect(timer, SIGNAL(timeout()), this, SLOT(move()));
-    timer->start(50);
+    timer->start(1000/30); //30 fps
 }
 
-void Player::keyPressEvent(QKeyEvent *event) {
+void Player::keyPressEvent(QKeyEvent *event) {    
 
     //move_dir [UP, LEFT, DOWN, RIGHT]
 
@@ -34,10 +36,52 @@ void Player::keyReleaseEvent(QKeyEvent *event) {
     if (event->key() == Qt::Key_Right) move_dir.at(3) = false;
 }
 
+//Pinta un pixel más!
+
+//La idea es NO bloquear nada cuando se esté en los O.
+
+//O ■ ■ ■ O
+//■       ■
+//■       ■
+//■       ■
+//O ■ ■ ■ O
+
+void Player::stop(short x_wall, short y_wall, short width_wall, short height_wall) {
+
+    short x_left = (x_wall - width), x_right = (x_wall + width_wall),
+            y_up = (y_wall - height), y_down = (y_wall + height_wall);
+
+    if (y() == y_up) {
+        if ((x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
+        else if ((x() == x_left) and move_dir.at(2) and move_dir.at(3)) move_dir.at(2) = false;
+        else if ((x() == x_right) and move_dir.at(2) and move_dir.at(1)) move_dir.at(2) = false;
+    }
+    else if (y() == y_down) {
+        if ((x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
+        else if ((x() == x_left) and move_dir.at(0) and move_dir.at(3)) move_dir.at(0) = false;
+        else if ((x() == x_right) and move_dir.at(0) and move_dir.at(1)) move_dir.at(0) = false;
+    }
+    else if (x() == x_right) move_dir.at(1) = false;
+    else if (x() == x_left) move_dir.at(3) = false;
+
+    //Esto causaba el bug de atravesar las paredes por las esquinas.
+
+//    if ((y() == y_up) and (x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
+//    if ((y() == y_down) and (x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
+
+//    if ((x() == x_left) and (y() != y_up) and (y() != y_down)) move_dir.at(3) = false;
+//    if ((x() == x_right) and (y() != y_up) and (y() != y_down)) move_dir.at(1) = false;
+}
+
 void Player::move() {
 
-    if (move_dir.at(0)) setPos(x(), y() - 10);
-    if (move_dir.at(1)) setPos(x() - 10, y());
-    if (move_dir.at(2)) setPos(x(), y() + 10);
-    if (move_dir.at(3)) setPos(x() + 10, y());
+    QList <QGraphicsItem*> collisions = collidingItems();
+    //LONGITUD DE LAS PAREDES.
+    for (auto it = collisions.cbegin(); it != collisions.cend(); it++) stop((*it)->x(), (*it)->y(), 30, 30);
+
+    short pixels = 10;
+    if (move_dir.at(0)) setPos(x(), y() - pixels);
+    if (move_dir.at(1)) setPos(x() - pixels, y());
+    if (move_dir.at(2)) setPos(x(), y() + pixels);
+    if (move_dir.at(3)) setPos(x() + pixels, y());
 }
