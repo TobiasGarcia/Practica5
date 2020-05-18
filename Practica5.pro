@@ -19,11 +19,13 @@ SOURCES += \
     main.cpp \
     pacman.cpp \
     player.cpp \
+    point.cpp \
     wall.cpp
 
 HEADERS += \
     pacman.h \
     player.h \
+    point.h \
     wall.h
 
 FORMS +=

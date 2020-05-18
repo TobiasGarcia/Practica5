@@ -2,13 +2,13 @@
 #define WALL_H
 
 #include <QGraphicsRectItem>
-#include <array>
 
 class Wall: public QGraphicsRectItem {
 private:
-    short width = 30, height = 30;
+    short width = 25, height = 25;
 public:
     Wall(short x, short y);
+    ~Wall();
 };
 
 #endif // WALL_H

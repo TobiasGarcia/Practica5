@@ -9,7 +9,8 @@ class Player: public QObject, public QGraphicsRectItem {
     Q_OBJECT
 
 private:
-    short width = 30, height = 30;
+    bool tp = false;
+    short width = 25, height = 25;
     //move_dir [UP, LEFT, DOWN, RIGHT]
     std::array<bool, 4> move_dir;
 public:

@@ -23,9 +23,15 @@ void Player::keyPressEvent(QKeyEvent *event) {
     //move_dir [UP, LEFT, DOWN, RIGHT]
 
     if (event->key() == Qt::Key_Up) move_dir.at(0) = true;
-    if (event->key() == Qt::Key_Left) move_dir.at(1) = true;
+    if (event->key() == Qt::Key_Left) {
+        move_dir.at(1) = true;
+        tp = false;
+    }
     if (event->key() == Qt::Key_Down) move_dir.at(2) = true;
-    if (event->key() == Qt::Key_Right) move_dir.at(3) = true;
+    if (event->key() == Qt::Key_Right) {
+        move_dir.at(3) = true;
+        tp = false;
+    }
 }
 
 void Player::keyReleaseEvent(QKeyEvent *event) {
@@ -77,11 +83,65 @@ void Player::move() {
 
     QList <QGraphicsItem*> collisions = collidingItems();
     //LONGITUD DE LAS PAREDES.
-    for (auto it = collisions.cbegin(); it != collisions.cend(); it++) stop((*it)->x(), (*it)->y(), 30, 30);
+    for (auto it = collisions.cbegin(); it != collisions.cend(); it++) stop((*it)->x(), (*it)->y(), 25, 25);
 
-    short pixels = 10;
+    short pixels = 5;
     if (move_dir.at(0)) setPos(x(), y() - pixels);
     if (move_dir.at(1)) setPos(x() - pixels, y());
     if (move_dir.at(2)) setPos(x(), y() + pixels);
     if (move_dir.at(3)) setPos(x() + pixels, y());
+
+    if ((x() == (162 + 475)) and (y() == (10 + 225)) and !tp) {
+        setPos(162 - 25, y());
+        tp = true;
+    }
+    else if ((x() == (162 - 25)) and (y() == (10 + 225)) and !tp) {
+        setPos(162 + 475, y());
+        tp = true;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
