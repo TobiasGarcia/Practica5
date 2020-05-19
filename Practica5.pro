@@ -20,17 +20,25 @@ SOURCES += \
     pacman.cpp \
     player.cpp \
     point.cpp \
-    wall.cpp
+    score.cpp \
+    wall.cpp \
+    widget.cpp
 
 HEADERS += \
     pacman.h \
     player.h \
     point.h \
-    wall.h
+    score.h \
+    wall.h \
+    widget.h
 
-FORMS +=
+FORMS += \
+    widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc

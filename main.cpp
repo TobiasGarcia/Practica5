@@ -1,12 +1,11 @@
+#include "widget.h"
+
 #include <QApplication>
-#include "pacman.h"
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char *argv[])
+{
     QApplication a(argc, argv);
-
-    Pacman *pacman = new Pacman;
-    pacman->show();
-
+    Widget w;
+    w.show();
     return a.exec();
 }
