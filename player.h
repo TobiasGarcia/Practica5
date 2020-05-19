@@ -15,6 +15,7 @@ private:
     std::array<bool, 4> move_dir;
 public:
     Player(short x, short y);
+    ~Player() {};
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void stop(short x_wall, short y_wall, short width_wall, short height_wall);

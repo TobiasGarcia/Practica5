@@ -3,34 +3,31 @@
 
 Pacman::Pacman() {
 
-    scene = new QGraphicsScene;
+    setSceneRect(0, 0, 800, 600);
 
-    scene->setSceneRect(0, 0, 800, 600);
-    setScene(scene);
+    make_maze(162, 10);
 
-    setFixedSize(800, 600);
+    Point *p1 = new Point(162 + 25 + 13, 10 + 25 + 13);
+    addItem(p1);
 
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    Point *p2 = new Point(162 + 50 + 13, 10 + 25 + 13);
+    addItem(p2);
 
-    num = make_maze(162, 10);
+    Point *p3 = new Point(162 + 25 + 13, 10 + 50 + 13);
+    addItem(p3);
 
-    player = new Player(249, 247);
-    scene->addItem(player);
+    Point *p4 = new Point(162 + 75 + 13, 10 + 25 + 13);
+    addItem(p4);
+
+    addItem(player);
 
     player->setFlag(QGraphicsItem::ItemIsFocusable);
     player->setFocus();
 }
 
-Pacman::~Pacman() {
-    delete player;
-    for (short j = 0; j < num; j++) delete maze.at(j);
-    delete scene;
-}
+void Pacman::make_maze(short x, short y) {
 
-short Pacman::make_maze(short x, short y) {
-
-    bool maze_bool[21][19] = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    short maze_bool[21][19] = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                               {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                               {1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1},
                               {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -52,30 +49,19 @@ short Pacman::make_maze(short x, short y) {
                               {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 
-    short num = 0;
     for (short i = 0; i < 21; i++) {
         for (short j = 0; j < 19; j++) {
-            if (maze_bool[i][j]) {
-                maze.at(num) = new Wall(x + 25*j, y + 25*i);
-                scene->addItem(maze.at(num++));
-            }
+            if (maze_bool[i][j]) addItem(new Wall(x + 25*j, y + 25*i));
         }
     }
-    maze.at(num) = new Wall(x - 25, y + 200);
-    scene->addItem(maze.at(num++));
-    maze.at(num) = new Wall(x - 50, y + 225);
-    scene->addItem(maze.at(num++));
-    maze.at(num) = new Wall(x - 25, y + 250);
-    scene->addItem(maze.at(num++));
 
-    maze.at(num) = new Wall(x + 475, y + 200);
-    scene->addItem(maze.at(num++));
-    maze.at(num) = new Wall(x + 500, y + 225);
-    scene->addItem(maze.at(num++));
-    maze.at(num) = new Wall(x + 475, y + 250);
-    scene->addItem(maze.at(num++));
+    addItem(new Wall(x - 25, y + 200));
+    addItem(new Wall(x - 50, y + 225));
+    addItem(new Wall(x - 25, y + 250));
 
-    return num;
+    addItem(new Wall(x + 475, y + 200));
+    addItem(new Wall(x + 500, y + 225));
+    addItem(new Wall(x + 475, y + 250));
 }
 
 

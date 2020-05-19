@@ -1,21 +1,18 @@
 #ifndef PACMAN_H
 #define PACMAN_H
 
-#include <QGraphicsView>
+#include <QGraphicsScene>
 #include "player.h"
 #include "wall.h"
-#include <array>
+#include "point.h"
 
-class Pacman: public QGraphicsView {
+class Pacman: public QGraphicsScene {
 private:
-    short num;
-    QGraphicsScene *scene;
-    Player *player;
-    std::array<Wall*, 250> maze;
+    Player *player = new Player(249, 247);
 public:
     Pacman();
-    ~Pacman();
-    short make_maze(short x, short y);
+    ~Pacman() {delete player;};
+    void make_maze(short x, short y);
 };
 
 #endif // PACMAN_H

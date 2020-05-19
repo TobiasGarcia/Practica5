@@ -20,15 +20,18 @@ SOURCES += \
     pacman.cpp \
     player.cpp \
     point.cpp \
-    wall.cpp
+    wall.cpp \
+    widget.cpp
 
 HEADERS += \
     pacman.h \
     player.h \
     point.h \
-    wall.h
+    wall.h \
+    widget.h
 
-FORMS +=
+FORMS += \
+    widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

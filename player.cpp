@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <typeinfo>
 #include "wall.h"
+#include <QDebug>
 
 Player::Player(short x,short y) {
 
