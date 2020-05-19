@@ -10,11 +10,11 @@ class Player: public QObject, public QGraphicsRectItem {
 
 private:
     bool tp = false;
-    short width = 25, height = 25;
+    short width = 25, height = 25, x_maze, y_maze;
     //move_dir [UP, LEFT, DOWN, RIGHT]
     std::array<bool, 4> move_dir;
 public:
-    Player(short x, short y);
+    Player(short _x_maze, short _y_maze);
     ~Player() {};
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);

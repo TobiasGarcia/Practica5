@@ -7,10 +7,12 @@
 #include "wall.h"
 #include <QDebug>
 
-Player::Player(short x,short y) {
+Player::Player(short _x_maze, short _y_maze) {
 
+    x_maze = _x_maze;
+    y_maze = _y_maze;
     setRect(0, 0, width, height);
-    setPos(x - width/2, y - height/2);
+    setPos(x_maze + 225, y_maze + 375);
 
     move_dir.fill(false);
 
@@ -83,8 +85,17 @@ void Player::stop(short x_wall, short y_wall, short width_wall, short height_wal
 void Player::move() {
 
     QList <QGraphicsItem*> collisions = collidingItems();
-    //LONGITUD DE LAS PAREDES.
-    for (auto it = collisions.cbegin(); it != collisions.cend(); it++) stop((*it)->x(), (*it)->y(), 25, 25);
+
+    for (short i = 0; i < collisions.size(); i++) {
+
+        //Genera una advertencia.
+        //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions[i]->x(), collisions[i]->y(), 25, 25);
+
+        auto item = collisions[i];
+
+        //LONGITUD DE LAS PAREDES.
+        if (typeid(*item) == typeid(Wall)) stop(collisions[i]->x(), collisions[i]->y(), 25, 25);
+    }
 
     short pixels = 5;
     if (move_dir.at(0)) setPos(x(), y() - pixels);
@@ -92,12 +103,12 @@ void Player::move() {
     if (move_dir.at(2)) setPos(x(), y() + pixels);
     if (move_dir.at(3)) setPos(x() + pixels, y());
 
-    if ((x() == (162 + 475)) and (y() == (10 + 225)) and !tp) {
-        setPos(162 - 25, y());
+    if ((x() == (x_maze + 475)) and (y() == (y_maze + 225)) and !tp) {
+        setPos(x_maze - 25, y());
         tp = true;
     }
-    else if ((x() == (162 - 25)) and (y() == (10 + 225)) and !tp) {
-        setPos(162 + 475, y());
+    else if ((x() == (x_maze - 25)) and (y() == (y_maze + 225)) and !tp) {
+        setPos(x_maze + 475, y());
         tp = true;
     }
 }
