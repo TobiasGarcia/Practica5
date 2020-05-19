@@ -19,6 +19,7 @@ public:
 
 private:
     Ui::Widget *ui;
-    Pacman *pacman = new Pacman;
+    short width_game = 596, height_game = 646;
+    Pacman *pacman = new Pacman(width_game, height_game);
 };
 #endif // WIDGET_H

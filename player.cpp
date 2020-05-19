@@ -1,10 +1,10 @@
 #include "player.h"
 #include <QGraphicsScene>
 #include <QKeyEvent>
-#include <QTimer>
 #include <QDebug>
 #include <typeinfo>
 #include "wall.h"
+#include "point.h"
 #include <QDebug>
 
 Player::Player(short _x_maze, short _y_maze) {
@@ -16,8 +16,7 @@ Player::Player(short _x_maze, short _y_maze) {
 
     move_dir.fill(false);
 
-    QTimer *timer = new QTimer;
-    connect(timer, SIGNAL(timeout()), this, SLOT(move()));
+    connect(timer, &QTimer::timeout, this, &Player::move);
     timer->start(1000/30); //30 fps
 }
 
@@ -95,6 +94,18 @@ void Player::move() {
 
         //LONGITUD DE LAS PAREDES.
         if (typeid(*item) == typeid(Wall)) stop(collisions[i]->x(), collisions[i]->y(), 25, 25);
+        else if (typeid(*item) == typeid(Point)) {
+
+            //Para poder bajar en la jerarquia de las clases, en éste caso
+            //bajar de QGraphicsItem* a Point*.
+
+            Point *point = dynamic_cast<Point*>(item);
+            if (point->get_type() == 1) emit earn_point(100);
+            else emit earn_point(300);
+
+            scene()->removeItem(collisions[i]);
+            delete collisions[i];
+        }
     }
 
     short pixels = 5;

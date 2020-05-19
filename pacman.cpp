@@ -1,16 +1,20 @@
 #include "pacman.h"
 #include <QDebug>
 
-Pacman::Pacman() {
+Pacman::Pacman(short width_game, short height_game) {
 
-    setSceneRect(0, 0, 596, 600);
+    setSceneRect(0, 0, width_game, height_game);
 
     make_maze(x_maze, y_maze);
+
+    addItem(score);
 
     addItem(player);
 
     player->setFlag(QGraphicsItem::ItemIsFocusable);
     player->setFocus();
+
+    connect(player, &Player::earn_point, score, &Score::increase_score);
 }
 
 void Pacman::make_maze(short x_maze, short y_maze) {

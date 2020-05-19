@@ -20,6 +20,7 @@ SOURCES += \
     pacman.cpp \
     player.cpp \
     point.cpp \
+    score.cpp \
     wall.cpp \
     widget.cpp
 
@@ -27,6 +28,7 @@ HEADERS += \
     pacman.h \
     player.h \
     point.h \
+    score.h \
     wall.h \
     widget.h
 
@@ -37,3 +39,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc
