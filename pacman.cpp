@@ -4,17 +4,17 @@
 Pacman::Pacman(short width_game, short height_game) {
 
     setSceneRect(0, 0, width_game, height_game);
-
     make_maze(x_maze, y_maze);
 
     addItem(score);
-
+    addItem(ghost);
     addItem(player);
 
     player->setFlag(QGraphicsItem::ItemIsFocusable);
     player->setFocus();
 
     connect(player, &Player::earn_point, score, &Score::increase_score);
+    connect(player, &Player::new_target, ghost, &Ghost::update_target);
 }
 
 void Pacman::make_maze(short x_maze, short y_maze) {
