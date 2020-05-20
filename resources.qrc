@@ -2,4 +2,7 @@
     <qresource prefix="/">
         <file>resources/arcade.ttf</file>
     </qresource>
+    <qresource prefix="/images">
+        <file>resources/images/blinky.png</file>
+    </qresource>
 </RCC>

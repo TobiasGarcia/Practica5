@@ -4,6 +4,7 @@
 #include <QGraphicsRectItem>
 #include <QTimer>
 #include <array>
+#include "ghost.h"
 
 class Player: public QObject, public QGraphicsRectItem {
 
@@ -29,6 +30,7 @@ public:
 signals:
     void earn_point(short points);
     void new_target(short _x_tar, short _y_tar);
+    void scare_ghosts();
 
 public slots:
     void move();

@@ -15,6 +15,7 @@ Pacman::Pacman(short width_game, short height_game) {
 
     connect(player, &Player::earn_point, score, &Score::increase_score);
     connect(player, &Player::new_target, ghost, &Ghost::update_target);
+    connect(player, &Player::scare_ghosts, ghost, &Ghost::scared_ghost);
 }
 
 void Pacman::make_maze(short x_maze, short y_maze) {

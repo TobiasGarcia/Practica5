@@ -111,10 +111,23 @@ void Player::move() {
 
             Point *point = dynamic_cast<Point*>(item);
             if (point->get_type() == 1) emit earn_point(10);
-            else emit earn_point(50);
+            else {
+                emit earn_point(50);
+                emit scare_ghosts();
+            }
 
             scene()->removeItem(collisions.at(i));
             delete collisions.at(i);
+        }
+        else if (typeid(*item) == typeid(Ghost)) {
+
+            Ghost *ghost = dynamic_cast<Ghost*>(item);
+            if (ghost->get_state() == 1) {
+                qDebug() << ghost->get_state();
+                emit earn_point(200);
+                ghost->go_home();
+            }
+            else if (ghost->get_state() == 0) qDebug() << "GAME OVER";
         }
     }
 
