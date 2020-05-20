@@ -120,10 +120,8 @@ void Player::move() {
             delete collisions.at(i);
         }
         else if (typeid(*item) == typeid(Ghost)) {
-
             Ghost *ghost = dynamic_cast<Ghost*>(item);
             if (ghost->get_state() == 1) {
-                qDebug() << ghost->get_state();
                 emit earn_point(200);
                 ghost->go_home();
             }

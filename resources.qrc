@@ -4,5 +4,19 @@
     </qresource>
     <qresource prefix="/images">
         <file>resources/images/blinky.png</file>
+        <file>resources/images/ghosts/blinky1.png</file>
+        <file>resources/images/ghosts/blinky2.png</file>
+        <file>resources/images/ghosts/clyde1.png</file>
+        <file>resources/images/ghosts/clyde2.png</file>
+        <file>resources/images/ghosts/eyesD.png</file>
+        <file>resources/images/ghosts/eyesL.png</file>
+        <file>resources/images/ghosts/eyesR.png</file>
+        <file>resources/images/ghosts/eyesU.png</file>
+        <file>resources/images/ghosts/inky1.png</file>
+        <file>resources/images/ghosts/inky2.png</file>
+        <file>resources/images/ghosts/pinky1.png</file>
+        <file>resources/images/ghosts/pinky2.png</file>
+        <file>resources/images/ghosts/scared1.png</file>
+        <file>resources/images/ghosts/scared2.png</file>
     </qresource>
 </RCC>

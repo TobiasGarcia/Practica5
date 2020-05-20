@@ -5,7 +5,8 @@
 #include <QTimer>
 #include <array>
 #include <math.h>
-#include <wall.h>
+#include "wall.h"
+#include <QPainter>
 
 class Ghost: public QObject, public QGraphicsPixmapItem {
 
@@ -23,7 +24,7 @@ private:
 
     float pixels = 5;
     std::array<bool, 4> move_dir;
-    QTimer *move_timer = new QTimer;
+    QTimer *move_timer;
     //La variable dir es la dirección inicial del fantasma.
     short x_tar, y_tar, gap[4] = {0, -1, 0, 1}, dir = 2;
 
@@ -33,17 +34,25 @@ private:
 
     //----------------------------------------------------------------COLISIONES
 
-    QTimer  *scare_timer = new QTimer;
+    QTimer  *scare_timer;
     QList <QGraphicsItem*> collisions;
 
     void fit_tile();
+
+    //------------------------------------------------------------------IMÁGENES
+
+    bool sheet_bool = true;
+    QPixmap *eyes, *scared_ghost, *sheets;
+    QTimer *animation_timer;
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 public:
 
     //-------------------------------------------------------------------GENERAL
 
-    Ghost(short _x_maze, short _y_maze);
-    ~Ghost() {delete move_timer; delete scare_timer;};
+    Ghost(short _x_maze, short _y_maze, QPixmap *_eyes, QPixmap *_scared_ghost);
+    ~Ghost();
 
     //----------------------------------------------------------------COLISIONES
 
@@ -59,8 +68,12 @@ public slots:
 
     //----------------------------------------------------------------COLISIONES
 
-    void scared_ghost();
+    void scare();
     void normal_ghost();
+
+    //------------------------------------------------------------------IMÁGENES
+
+    void animate_ghost() {sheet_bool = !sheet_bool;};
 };
 
 #endif // GHOST_H

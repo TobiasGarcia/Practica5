@@ -6,6 +6,21 @@ Pacman::Pacman(short width_game, short height_game) {
     setSceneRect(0, 0, width_game, height_game);
     make_maze(x_maze, y_maze);
 
+    player = new Player(x_maze, y_maze);
+    score = new Score();
+
+    eyes = new QPixmap[4];
+    eyes[0] = QPixmap(":/images/resources/images/ghosts/eyesU.png");
+    eyes[1] = QPixmap(":/images/resources/images/ghosts/eyesL.png");
+    eyes[2] = QPixmap(":/images/resources/images/ghosts/eyesD.png");
+    eyes[3] = QPixmap(":/images/resources/images/ghosts/eyesR.png");
+
+    scared_ghost = new QPixmap[2];
+    scared_ghost[0] = QPixmap(":/images/resources/images/ghosts/scared1.png");
+    scared_ghost[1] = QPixmap(":/images/resources/images/ghosts/scared2.png");
+
+    ghost = new Ghost(x_maze, y_maze, eyes, scared_ghost);
+
     addItem(score);
     addItem(ghost);
     addItem(player);
@@ -15,7 +30,15 @@ Pacman::Pacman(short width_game, short height_game) {
 
     connect(player, &Player::earn_point, score, &Score::increase_score);
     connect(player, &Player::new_target, ghost, &Ghost::update_target);
-    connect(player, &Player::scare_ghosts, ghost, &Ghost::scared_ghost);
+    connect(player, &Player::scare_ghosts, ghost, &Ghost::scare);
+}
+
+Pacman::~Pacman() {
+    delete player;
+    delete score;
+    delete ghost;
+    delete[] eyes;
+    delete[] scared_ghost;
 }
 
 void Pacman::make_maze(short x_maze, short y_maze) {

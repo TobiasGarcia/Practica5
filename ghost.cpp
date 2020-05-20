@@ -6,7 +6,7 @@ QRectF Ghost::boundingRect() const {
     return QRectF(0, 0, 25, 25);
 }
 
-Ghost::Ghost(short _x_maze, short _y_maze) {
+Ghost::Ghost(short _x_maze, short _y_maze, QPixmap *_eyes, QPixmap *_scared_ghost) {
 
     x_maze = _x_maze;
     y_maze = _y_maze;
@@ -14,12 +14,32 @@ Ghost::Ghost(short _x_maze, short _y_maze) {
     x_tar = x_maze + 225;
     y_tar = y_maze + 375;
 
-    setPixmap(QPixmap(":/images/resources/images/blinky.png"));
+    eyes = _eyes;
+    scared_ghost = _scared_ghost;
+
+    sheets = new QPixmap[2];
+    sheets[0] = QPixmap(":/images/resources/images/ghosts/clyde1.png");
+    sheets[1] = QPixmap(":/images/resources/images/ghosts/clyde1.png");
+
+    setPixmap(sheets[0]);
     setPos(x_maze + 225, y_maze + 175);
 
+    move_timer = new QTimer;
+    scare_timer = new QTimer;
+    animation_timer = new QTimer;
+
     connect(move_timer, &QTimer::timeout, this, &Ghost::move);
+    connect(animation_timer, &QTimer::timeout, this, &Ghost::animate_ghost);
     connect(scare_timer, &QTimer::timeout, this, &Ghost::normal_ghost);
     move_timer->start(1000/30);
+    animation_timer->start(100);
+}
+
+Ghost::~Ghost() {
+    delete move_timer;
+    delete scare_timer;
+    delete[] sheets;
+    delete animation_timer;
 }
 
 //----------------------------------------------------------------MOVIMIENTO
@@ -112,7 +132,7 @@ void Ghost::fit_tile() {
     else setPos(x(), short(y()) - y_rem + 25);
 }
 
-void Ghost::scared_ghost() {
+void Ghost::scare() {
 
     state = 1;
     fit_tile();
@@ -138,6 +158,19 @@ void Ghost::go_home() {
 
     x_tar = x_maze + 225;
     y_tar = y_maze + 175;
+}
+
+void Ghost::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    if (state == 0) {
+        painter->drawPixmap(0, 0, sheets[sheet_bool]);
+        painter->drawPixmap(0, 0, eyes[dir]);
+    }
+    else if (state == 1) painter->drawPixmap(0, 0, scared_ghost[sheet_bool]);
+    else painter->drawPixmap(0, 0, eyes[dir]);
 }
 
 void Ghost::normal_ghost() {
