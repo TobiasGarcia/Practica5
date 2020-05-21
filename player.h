@@ -4,6 +4,7 @@
 #include <QGraphicsRectItem>
 #include <QTimer>
 #include <array>
+#include "ghost.h"
 
 class Player: public QObject, public QGraphicsRectItem {
 
@@ -11,18 +12,26 @@ class Player: public QObject, public QGraphicsRectItem {
 
 private:
     bool tp = false;
-    short width = 25, height = 25, x_maze, y_maze;
+    short width = 25, height = 25, pixels = 5, last_presesed = 0,
+    x_maze, y_maze, gap[4] = {0, -1, 0, 1};
     //move_dir [UP, LEFT, DOWN, RIGHT]
-    std::array<bool, 4> move_dir;
+    std::array<bool, 4> pressed_dir, move_dir;
     QTimer *timer = new QTimer;
-public:
-    Player(short _x_maze, short _y_maze);
-    ~Player() {delete timer;};
+    QList <QGraphicsItem*> collisions;
+
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void stop(short x_wall, short y_wall, short width_wall, short height_wall);
+
+public:
+    Player(short _x_maze, short _y_maze);
+    ~Player() {delete timer;};
+
 signals:
     void earn_point(short points);
+    void new_target(short x_pac, short y_pac, short dir_pac);
+    void scare_ghosts();
+
 public slots:
     void move();
 };

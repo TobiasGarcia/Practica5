@@ -10,6 +10,8 @@ Widget::Widget(QWidget *parent)
     layout()->setMargin(0);
     setFixedSize(width_game, height_game);
 
+    ui->graphicsView->setBackgroundBrush(QBrush(Qt::darkCyan, Qt::SolidPattern));
+
     ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
