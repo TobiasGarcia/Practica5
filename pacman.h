@@ -14,7 +14,7 @@ private:
     Player *player;
     Score *score;
     QPixmap *eyes, *scared_ghost;
-    Ghost *ghost;
+    Ghost *blinky, *pinky, *inky, *clyde;
 
     void make_maze(short x, short y);
 

@@ -146,7 +146,9 @@ void Player::move() {
         tp = true;
     }
 
-    emit new_target(x(), y());
+    //Enviamos la dirección hacia donde quiere ir el jugador.
+
+    emit new_target(x(), y(), last_presesed);
 }
 
 

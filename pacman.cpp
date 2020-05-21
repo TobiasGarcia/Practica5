@@ -19,24 +19,49 @@ Pacman::Pacman(short width_game, short height_game) {
     scared_ghost[0] = QPixmap(":/images/resources/images/ghosts/scared1.png");
     scared_ghost[1] = QPixmap(":/images/resources/images/ghosts/scared2.png");
 
-    ghost = new Ghost(x_maze, y_maze, eyes, scared_ghost);
+    blinky = new Ghost(x_maze, y_maze, eyes, scared_ghost, 0);
+    pinky = new Ghost(x_maze, y_maze, eyes, scared_ghost, 1);
+    inky = new Ghost(x_maze, y_maze, eyes, scared_ghost, 2);
+    clyde = new Ghost(x_maze, y_maze, eyes, scared_ghost, 3);
 
     addItem(score);
-    addItem(ghost);
     addItem(player);
+
+    addItem(blinky);
+    addItem(pinky);
+    addItem(inky);
+    addItem(clyde);
+
+    addItem(blinky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    addItem(pinky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    addItem(inky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    addItem(clyde->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
     player->setFlag(QGraphicsItem::ItemIsFocusable);
     player->setFocus();
 
     connect(player, &Player::earn_point, score, &Score::increase_score);
-    connect(player, &Player::new_target, ghost, &Ghost::update_target);
-    connect(player, &Player::scare_ghosts, ghost, &Ghost::scare);
+
+    connect(player, &Player::new_target, blinky, &Ghost::update_target);
+    connect(player, &Player::new_target, pinky, &Ghost::update_target);
+    connect(player, &Player::new_target, inky, &Ghost::update_target);
+    connect(player, &Player::new_target, clyde, &Ghost::update_target);
+
+    connect(player, &Player::scare_ghosts, blinky, &Ghost::scare);
+    connect(player, &Player::scare_ghosts, pinky, &Ghost::scare);
+    connect(player, &Player::scare_ghosts, inky, &Ghost::scare);
+    connect(player, &Player::scare_ghosts, clyde, &Ghost::scare);
+
+    connect(blinky, &Ghost::blinky_pos, inky, &Ghost::inky_target);
 }
 
 Pacman::~Pacman() {
     delete player;
     delete score;
-    delete ghost;
+    delete blinky;
+    delete pinky;
+    delete inky;
+    delete clyde;
     delete[] eyes;
     delete[] scared_ghost;
 }

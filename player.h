@@ -29,7 +29,7 @@ public:
 
 signals:
     void earn_point(short points);
-    void new_target(short _x_tar, short _y_tar);
+    void new_target(short x_pac, short y_pac, short dir_pac);
     void scare_ghosts();
 
 public slots:
