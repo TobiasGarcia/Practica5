@@ -3,7 +3,7 @@
 //-------------------------------------------------------------------GENERAL
 
 QRectF Ghost::boundingRect() const {
-    return QRectF(0, 0, 25, 25);
+    return QRectF(-1, -1, 27, 27);
 }
 
 Ghost::Ghost(short _x_maze, short _y_maze, QPixmap *_eyes, QPixmap *_scared_ghost, short _id) {
@@ -43,8 +43,8 @@ Ghost::Ghost(short _x_maze, short _y_maze, QPixmap *_eyes, QPixmap *_scared_ghos
     setPixmap(sheets[0]);
     setPos(x_maze + 225, y_maze + 175);
 
-    target = new QGraphicsPixmapItem;//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    target->setPixmap(sheets[0]);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    //target = new QGraphicsPixmapItem;//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    //target->setPixmap(sheets[0]);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
     move_timer = new QTimer;
     scare_timer = new QTimer;
@@ -63,7 +63,7 @@ Ghost::~Ghost() {
     delete scare_timer;
     delete[] sheets;
     delete animation_timer;
-    delete target;//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    //delete target;//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 //----------------------------------------------------------------MOVIMIENTO
@@ -92,13 +92,13 @@ void Ghost::blinky_target(short x_pac, short y_pac) {
 
     x_tar = x_pac;
     y_tar = y_pac;
-    target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 void Ghost::pinky_target(short x_pac, short y_pac, short dir_pac) {
     x_tar = x_pac + 40*gap[dir_pac];
     y_tar = y_pac + 40*gap[(dir_pac + 1)%4];
-    target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 void Ghost::inky_target(short x_pac, short y_pac, short x_blin, short y_blin, short dir_pac) {
@@ -113,7 +113,7 @@ void Ghost::inky_target(short x_pac, short y_pac, short x_blin, short y_blin, sh
 
     x_tar = 2*x_tar - x_blin;
     y_tar = 2*y_tar - y_blin;
-    target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 void Ghost::clyde_target(short x_pac, short y_pac) {
@@ -126,7 +126,7 @@ void Ghost::clyde_target(short x_pac, short y_pac) {
         x_tar = x_maze;
         y_tar = y_maze + 525;
     }
-    target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 void Ghost::choose_dir() {
