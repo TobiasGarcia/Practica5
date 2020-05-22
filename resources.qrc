@@ -3,7 +3,6 @@
         <file>resources/arcade.ttf</file>
     </qresource>
     <qresource prefix="/images">
-        <file>resources/images/blinky.png</file>
         <file>resources/images/ghosts/blinky1.png</file>
         <file>resources/images/ghosts/blinky2.png</file>
         <file>resources/images/ghosts/clyde1.png</file>
@@ -18,5 +17,20 @@
         <file>resources/images/ghosts/pinky2.png</file>
         <file>resources/images/ghosts/scared1.png</file>
         <file>resources/images/ghosts/scared2.png</file>
+        <file>resources/images/pacman/pacman1.png</file>
+        <file>resources/images/pacman/pacman2.png</file>
+        <file>resources/images/pacman/pacman3.png</file>
+        <file>resources/images/walls/horizontal1.png</file>
+        <file>resources/images/walls/corner1.png</file>
+        <file>resources/images/walls/corner2.png</file>
+        <file>resources/images/walls/door.png</file>
+        <file>resources/images/walls/end.png</file>
+        <file>resources/images/walls/horizontal2.png</file>
+        <file>resources/images/walls/t1.png</file>
+        <file>resources/images/walls/t2.png</file>
+        <file>resources/images/walls/empty.png</file>
+        <file>resources/images/points/point.png</file>
+        <file>resources/images/points/big_point1.png</file>
+        <file>resources/images/points/big_point2.png</file>
     </qresource>
 </RCC>

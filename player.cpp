@@ -7,11 +7,22 @@
 #include "point.h"
 #include <QDebug>
 
+QRectF Player::boundingRect() const {
+    return QRectF(-1, -1, 27, 27);
+}
+
 Player::Player(short _x_maze, short _y_maze) {
 
     x_maze = _x_maze;
     y_maze = _y_maze;
-    setRect(0, 0, width, height);
+
+    script = new QPixmap[3];
+    script[0] = QPixmap(":/images/resources/images/pacman/pacman1.png");
+    script[1] = QPixmap(":/images/resources/images/pacman/pacman2.png");
+    script[2] = QPixmap(":/images/resources/images/pacman/pacman3.png");
+
+
+    setPixmap(script[0]);
     setPos(x_maze + 225, y_maze + 375);
 
     pressed_dir.fill(false);
@@ -83,6 +94,8 @@ void Player::stop(short x_wall, short y_wall, short width_wall, short height_wal
 
     //Esto causaba el bug de atravesar las paredes por las esquinas.
 
+    //qDebug() << x_wall << "   " << y_wall << "        " <<  x() << y();
+
     if ((y() == y_up) and (x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
     if ((y() == y_down) and (x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
 
@@ -90,18 +103,36 @@ void Player::stop(short x_wall, short y_wall, short width_wall, short height_wal
     if ((x() == x_right) and (y() != y_up) and (y() != y_down)) move_dir.at(1) = false;
 }
 
+void Player::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    painter->translate(13, 13);
+    painter->rotate(-dir*90);
+    painter->translate(-13, -13);
+    painter->drawPixmap(2, 2, script[num_script]);
+
+
+//    if (state == 0) {
+//        painter->drawPixmap(0, 0, sheets[sheet_bool]);
+//        painter->drawPixmap(0, 0, eyes[dir]);
+//    }
+//    else if (state == 1) painter->drawPixmap(0, 0, scared_ghost[sheet_bool]);
+//    else painter->drawPixmap(0, 0, eyes[dir]);
+}
+
 void Player::move() {
 
     move_dir = pressed_dir;
 
-    collisions = collidingItems();
+    collisions = collidingItems(Qt::IntersectsItemBoundingRect);
     for (short i = 0; i < collisions.size(); i++) {
 
         //Genera una advertencia.
         //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions[i]->x(), collisions[i]->y(), 25, 25);
 
         auto item = collisions.at(i);
-
         //LONGITUD DE LAS PAREDES.
         if (typeid(*item) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y(), 25, 25);
         else if (typeid(*item) == typeid(Point)) {
@@ -131,11 +162,29 @@ void Player::move() {
 
     if (move_dir.at(last_presesed)) {
         setPos(x() + pixels*gap[last_presesed], y() + pixels*gap[(last_presesed + 1)%4]);
+        num_script = (num_script + 1)%3;
+        dir = last_presesed;
     }
-    else if (move_dir.at(0)) setPos(x(), y() - pixels);
-    else if (move_dir.at(1)) setPos(x() - pixels, y());
-    else if (move_dir.at(2)) setPos(x(), y() + pixels);
-    else if (move_dir.at(3)) setPos(x() + pixels, y());
+    else if (move_dir.at(0)) {
+        setPos(x(), y() - pixels);
+        num_script = (num_script + 1)%3;
+        dir = 0;
+    }
+    else if (move_dir.at(1)) {
+        setPos(x() - pixels, y());
+        num_script = (num_script + 1)%3;
+        dir = 1;
+    }
+    else if (move_dir.at(2)) {
+        setPos(x(), y() + pixels);
+        num_script = (num_script + 1)%3;
+        dir = 2;
+    }
+    else if (move_dir.at(3)) {
+        setPos(x() + pixels, y());
+        num_script = (num_script + 1)%3;
+        dir = 3;
+    }
 
     if ((x() == (x_maze + 475)) and (y() == (y_maze + 225)) and !tp) {
         setPos(x_maze - 25, y());

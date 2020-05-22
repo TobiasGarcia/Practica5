@@ -11,6 +11,7 @@
 class Pacman: public QGraphicsScene {
 private:
     short x_maze = 60, y_maze = 60;
+    QGraphicsPixmapItem *block1, *block2;
     Player *player;
     Score *score;
     QPixmap *eyes, *scared_ghost;
