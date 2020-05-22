@@ -103,17 +103,20 @@ void Ghost::pinky_target(short x_pac, short y_pac, short dir_pac) {
 
 void Ghost::inky_target(short x_pac, short y_pac, short x_blin, short y_blin, short dir_pac) {
 
-    //Calculamos el target auxiliar.
+    if (!state) {
 
-    x_tar = x_pac + 20*gap[dir_pac];
-    y_tar = y_pac + 20*gap[(dir_pac + 1)%4];
+        //Calculamos el target auxiliar.
 
-    //Reflejamos la posición de Blinky con
-    //respecto al target auxiliar.
+        x_tar = x_pac + 20*gap[dir_pac];
+        y_tar = y_pac + 20*gap[(dir_pac + 1)%4];
 
-    x_tar = 2*x_tar - x_blin;
-    y_tar = 2*y_tar - y_blin;
-    //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+        //Reflejamos la posición de Blinky con
+        //respecto al target auxiliar.
+
+        x_tar = 2*x_tar - x_blin;
+        y_tar = 2*y_tar - y_blin;
+        //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    }
 }
 
 void Ghost::clyde_target(short x_pac, short y_pac) {
@@ -231,6 +234,8 @@ void Ghost::go_home() {
 
     x_tar = x_maze + 225;
     y_tar = y_maze + 175;
+
+    //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
 void Ghost::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {

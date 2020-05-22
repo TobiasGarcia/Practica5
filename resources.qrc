@@ -29,5 +29,8 @@
         <file>resources/images/walls/t1.png</file>
         <file>resources/images/walls/t2.png</file>
         <file>resources/images/walls/empty.png</file>
+        <file>resources/images/points/point.png</file>
+        <file>resources/images/points/big_point1.png</file>
+        <file>resources/images/points/big_point2.png</file>
     </qresource>
 </RCC>
