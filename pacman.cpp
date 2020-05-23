@@ -4,33 +4,7 @@
 Pacman::Pacman(short width_game, short height_game) {
 
     setSceneRect(0, 0, width_game, height_game);
-    make_maze(x_maze, y_maze);
-
-    eyes = new QPixmap[4];
-    eyes[0] = QPixmap(":/images/resources/images/ghosts/eyesU.png");
-    eyes[1] = QPixmap(":/images/resources/images/ghosts/eyesL.png");
-    eyes[2] = QPixmap(":/images/resources/images/ghosts/eyesD.png");
-    eyes[3] = QPixmap(":/images/resources/images/ghosts/eyesR.png");
-
-    scared_ghost = new QPixmap[2];
-    scared_ghost[0] = QPixmap(":/images/resources/images/ghosts/scared1.png");
-    scared_ghost[1] = QPixmap(":/images/resources/images/ghosts/scared2.png");
-
-    score = new Score();
-    addItem(score);
-
-    create_characters();
-    set_freeze(true);
-
-    blinky->setPos(x_maze + 225, y_maze + 175);
-    pinky->setPos(x_maze + 225, y_maze + 225);
-    inky->setPos(x_maze + 250, y_maze + 225);
-    clyde->setPos(x_maze + 200, y_maze + 225);
-
-    //addItem(blinky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    //addItem(pinky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    //addItem(inky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    //addItem(clyde->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    setup_game();
 }
 
 void Pacman::create_characters() {
@@ -71,16 +45,19 @@ void Pacman::create_characters() {
 }
 
 Pacman::~Pacman() {
-    delete player;
-    delete score;
-    delete blinky;
-    delete pinky;
-    delete inky;
-    delete clyde;
-    delete[] eyes;
-    delete[] scared_ghost;
-    delete block1;
-    delete block2;
+    if (delete_bool) {
+        delete player;
+        delete score;
+        delete blinky;
+        delete pinky;
+        delete inky;
+        delete clyde;
+        delete[] eyes;
+        delete[] scared_ghost;
+        delete block1;
+        delete block2;
+        delete message;
+    }
 }
 
 void Pacman::to_lose() {
@@ -97,6 +74,9 @@ void Pacman::to_lose() {
     initilize_characters();
     add_characters();
 
+    message->press_key_msg();
+    addItem(message);
+
     player->setFlag(QGraphicsItem::ItemIsFocusable);
     player->setFocus();
 }
@@ -104,8 +84,17 @@ void Pacman::to_lose() {
 void Pacman::to_win() {
 
     set_freeze(true);
+    delay(1000);
+    remove_characters();
 
-    qDebug() << "WIN";
+    player->win_animation();
+
+    score->win_score();
+    message->win_msg();
+    addItem(message);
+
+    delay(5000);
+    restart_game();
 }
 
 void Pacman::begin_game() {
@@ -115,12 +104,12 @@ void Pacman::begin_game() {
     inky->setPos(x_maze + 250, y_maze + 175);
     clyde->setPos(x_maze + 275, y_maze + 175);
 
-    qDebug() << "READY?";
-
+    message->ready_msg();
     delay(1000);
-
-    qDebug() << "BEGIN";
+    message->go_msg();
     set_freeze(false);
+    delay(1000);
+    removeItem(message);
 }
 
 //void Pacman::decrease_points_left(short points) {
@@ -209,6 +198,49 @@ void Pacman::add_characters() {
 
     addItem(block1);
     addItem(block2);
+}
+
+void Pacman::restart_game() {
+
+    QGraphicsScene::clear();
+    delete_bool = false;
+    setup_game();
+}
+
+void Pacman::setup_game() {
+
+    make_maze(x_maze, y_maze);
+
+    eyes = new QPixmap[4];
+    eyes[0] = QPixmap(":/images/resources/images/ghosts/eyesU.png");
+    eyes[1] = QPixmap(":/images/resources/images/ghosts/eyesL.png");
+    eyes[2] = QPixmap(":/images/resources/images/ghosts/eyesD.png");
+    eyes[3] = QPixmap(":/images/resources/images/ghosts/eyesR.png");
+
+    scared_ghost = new QPixmap[2];
+    scared_ghost[0] = QPixmap(":/images/resources/images/ghosts/scared1.png");
+    scared_ghost[1] = QPixmap(":/images/resources/images/ghosts/scared2.png");
+
+    score = new Score;
+    addItem(score);
+
+    message = new Message;
+    addItem(message);
+
+    create_characters();
+    set_freeze(true);
+
+    blinky->setPos(x_maze + 225, y_maze + 175);
+    pinky->setPos(x_maze + 225, y_maze + 225);
+    inky->setPos(x_maze + 250, y_maze + 225);
+    clyde->setPos(x_maze + 200, y_maze + 225);
+
+    //addItem(blinky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    //addItem(pinky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    //addItem(inky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    //addItem(clyde->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+    delete_bool = true;
 }
 
 

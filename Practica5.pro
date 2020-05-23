@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     ghost.cpp \
     main.cpp \
+    message.cpp \
     pacman.cpp \
     player.cpp \
     point.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
 
 HEADERS += \
     ghost.h \
+    message.h \
     pacman.h \
     player.h \
     point.h \

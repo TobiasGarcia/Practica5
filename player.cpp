@@ -65,6 +65,7 @@ void Player::keyPressEvent(QKeyEvent *event) {
     if (!is_playing) {
         is_playing = true;
         emit begin();
+        return;
     }
 
     //move_dir [UP, LEFT, DOWN, RIGHT]
@@ -259,6 +260,26 @@ void Player::lose_animation() {
     }
     update();
     is_playing = false;
+}
+
+void Player::win_animation() {
+
+    dir = 3;
+    num_script = 1; update(); delay(150);
+    for (num_script = 0; num_script < 3; num_script++) {
+        update();
+        delay(150);
+    }
+    for (num_script = 0; num_script < 3; num_script++) {
+        update();
+        delay(150);
+    }
+    for (num_script = 0; num_script < 3; num_script++) {
+        update();
+        delay(150);
+    }
+    num_script = 1;
+    update();
 }
 
 

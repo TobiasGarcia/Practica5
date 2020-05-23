@@ -45,6 +45,7 @@ public:
     void focusOutEvent(QFocusEvent *event);
     void set_freeze(bool _freeze) {freeze = _freeze;};
     void initialize();
+    void win_animation();
 
 signals:
     void earn_point(short points);

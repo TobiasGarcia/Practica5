@@ -13,6 +13,8 @@ public:
     ~Score() {};
 public slots:
     void increase_score(short points);
+    void restart_score();
+    void win_score();
 };
 
 #endif // SCORE_H
