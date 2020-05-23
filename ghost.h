@@ -22,13 +22,13 @@ private:
 
     //----------------------------------------------------------------MOVIMIENTO
 
-    float pixels = 5;
+    bool freeze;
+    float pixels;
     QTimer *move_timer;
     std::array<bool, 4> move_dir;
     short x_tar, y_tar, gap[4] = {0, -1, 0, 1}, dir = 0;
 
     void choose_dir();
-    float calculate_dist(short x, short y, short x_tar, short y_tar);
     void stop(short x_wall, short y_wall, short width_wall, short height_wall);
     void blinky_target(short x_pac, short y_pac);
     void pinky_target(short x_pac, short y_pac, short dir_pac);
@@ -57,6 +57,7 @@ public:
 
     Ghost(short _x_maze, short _y_maze, QPixmap *_eyes, QPixmap *_scared_ghost, short _id);
     ~Ghost();
+    void initialize();
 
     //----------------------------------------------------------------COLISIONES
 
@@ -72,6 +73,7 @@ public slots:
     //----------------------------------------------------------------MOVIMIENTO
 
     void move();
+    void set_freeze(bool _freeze);
     void update_target(short x_pac, short y_pac, short dir_pac);
     void inky_target(short x_pac, short y_pac, short x_blin, short y_blin, short dir_pac);
 
@@ -84,5 +86,7 @@ public slots:
 
     void animate_ghost() {sheet_bool = !sheet_bool;};
 };
+
+float calculate_dist(short x, short y, short x_tar, short y_tar);
 
 #endif // GHOST_H

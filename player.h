@@ -6,6 +6,8 @@
 #include <array>
 #include "ghost.h"
 #include <QDebug>
+#include <QTime>
+#include <QCoreApplication>
 
 class Player: public QObject, public QGraphicsPixmapItem {
 
@@ -13,12 +15,15 @@ class Player: public QObject, public QGraphicsPixmapItem {
 
 private:
 
+    bool is_playing = false;
     QRectF boundingRect() const;
 
     QPixmap *script;
-    short num_script = 0, dir = 0;
+    short dir = 0;
 
-    bool tp = false;
+    short points_left = 150; //150
+
+    bool tp = false, freeze;
     short width = 25, height = 25, pixels = 5, last_presesed = 0,
     x_maze, y_maze, gap[4] = {0, -1, 0, 1};
     //move_dir [UP, LEFT, DOWN, RIGHT]
@@ -33,16 +38,27 @@ private:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 public:
+    short num_script = 0;
+
     Player(short _x_maze, short _y_maze);
     ~Player() {delete timer; delete[] script;};
+    void focusOutEvent(QFocusEvent *event);
+    void set_freeze(bool _freeze) {freeze = _freeze;};
+    void initialize();
 
 signals:
     void earn_point(short points);
     void new_target(short x_pac, short y_pac, short dir_pac);
     void scare_ghosts();
+    void touched_ghost();
+    void no_points_left();
+    void begin();
 
 public slots:
     void move();
+    void lose_animation();
 };
+
+void delay(short mili);
 
 #endif // PLAYER_H

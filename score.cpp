@@ -6,7 +6,7 @@ Score::Score() {
     setPlainText(QString("Score: ") + QString::number(score));
     setDefaultTextColor(Qt::white);
     setFont(QFont("arcade normal", 12));
-    setPos(62, 20);
+    setPos(80, 25);
 }
 
 void Score::increase_score(short points) {

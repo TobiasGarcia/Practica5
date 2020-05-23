@@ -16,23 +16,56 @@ Player::Player(short _x_maze, short _y_maze) {
     x_maze = _x_maze;
     y_maze = _y_maze;
 
-    script = new QPixmap[3];
+    script = new QPixmap[15];
     script[0] = QPixmap(":/images/resources/images/pacman/pacman1.png");
     script[1] = QPixmap(":/images/resources/images/pacman/pacman2.png");
     script[2] = QPixmap(":/images/resources/images/pacman/pacman3.png");
+    script[3] = QPixmap(":/images/resources/images/pacman/pacman4.png");
+    script[4] = QPixmap(":/images/resources/images/pacman/pacman5.png");
+    script[5] = QPixmap(":/images/resources/images/pacman/pacman6.png");
+    script[6] = QPixmap(":/images/resources/images/pacman/pacman7.png");
+    script[7] = QPixmap(":/images/resources/images/pacman/pacman8.png");
+    script[8] = QPixmap(":/images/resources/images/pacman/pacman9.png");
+    script[9] = QPixmap(":/images/resources/images/pacman/pacman10.png");
+    script[10] = QPixmap(":/images/resources/images/pacman/pacman11.png");
+    script[11] = QPixmap(":/images/resources/images/pacman/pacman12.png");
+    script[12] = QPixmap(":/images/resources/images/pacman/pacman13.png");
+    script[13] = QPixmap(":/images/resources/images/pacman/pacman14.png");
+    script[14] = QPixmap(":/images/resources/images/walls/empty.png");
 
-
-    setPixmap(script[0]);
-    setPos(x_maze + 225, y_maze + 375);
-
-    pressed_dir.fill(false);
-    move_dir.fill(false);
+    initialize();
 
     connect(timer, &QTimer::timeout, this, &Player::move);
     timer->start(1000/30); //30 fps
 }
 
+void Player::focusOutEvent(QFocusEvent *event) {
+    Q_UNUSED(event);
+    setFocus();
+}
+
+void Player::initialize() {
+
+    freeze = true;
+
+    num_script = 0;
+    dir = 0;
+    last_presesed = 0;
+    tp = false;
+
+    pressed_dir.fill(false);
+    move_dir.fill(false);
+
+    setPixmap(script[0]);
+    setPos(x_maze + 225, y_maze + 375);
+}
+
 void Player::keyPressEvent(QKeyEvent *event) {
+
+    if (!is_playing) {
+        is_playing = true;
+        emit begin();
+    }
 
     //move_dir [UP, LEFT, DOWN, RIGHT]
 
@@ -113,7 +146,6 @@ void Player::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     painter->translate(-13, -13);
     painter->drawPixmap(2, 2, script[num_script]);
 
-
 //    if (state == 0) {
 //        painter->drawPixmap(0, 0, sheets[sheet_bool]);
 //        painter->drawPixmap(0, 0, eyes[dir]);
@@ -123,6 +155,8 @@ void Player::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
 }
 
 void Player::move() {
+
+    if (freeze) return;
 
     move_dir = pressed_dir;
 
@@ -149,16 +183,29 @@ void Player::move() {
 
             scene()->removeItem(collisions.at(i));
             delete collisions.at(i);
+
+            points_left--;
+            if (points_left == 0) {
+                emit no_points_left();
+                return;
+            }
         }
-        else if (typeid(*item) == typeid(Ghost)) {
+        else if ((typeid(*item) == typeid(Ghost)) and (calculate_dist(collisions.at(i)->x(), collisions.at(i)->y(), x(), y()) < 15)) {
             Ghost *ghost = dynamic_cast<Ghost*>(item);
             if (ghost->get_state() == 1) {
                 emit earn_point(200);
                 ghost->go_home();
             }
-            else if (ghost->get_state() == 0) qDebug() << "GAME OVER";
+            else if (ghost->get_state() == 0) {
+                emit touched_ghost();
+                return;
+            }
         }
     }
+
+    //num_script = (num_script + 1)%3 debe ir dentro de los condicionales
+    //para que solo suceda cuando alguno salio true, si lo dejamos por fuera
+    //siempre sucedería.
 
     if (move_dir.at(last_presesed)) {
         setPos(x() + pixels*gap[last_presesed], y() + pixels*gap[(last_presesed + 1)%4]);
@@ -182,7 +229,6 @@ void Player::move() {
     }
     else if (move_dir.at(3)) {
         setPos(x() + pixels, y());
-        num_script = (num_script + 1)%3;
         dir = 3;
     }
 
@@ -198,6 +244,21 @@ void Player::move() {
     //Enviamos la dirección hacia donde quiere ir el jugador.
 
     emit new_target(x(), y(), last_presesed);
+}
+
+void delay(short mili) {
+    QTime sleep_time = QTime::currentTime().addMSecs(mili);
+    while (QTime::currentTime() < sleep_time) QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+}
+
+void Player::lose_animation() {
+
+    for (num_script = 0; num_script < 14; num_script++) {
+        update();
+        delay(150);
+    }
+    update();
+    is_playing = false;
 }
 
 

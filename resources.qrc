@@ -32,5 +32,16 @@
         <file>resources/images/points/point.png</file>
         <file>resources/images/points/big_point1.png</file>
         <file>resources/images/points/big_point2.png</file>
+        <file>resources/images/pacman/pacman4.png</file>
+        <file>resources/images/pacman/pacman5.png</file>
+        <file>resources/images/pacman/pacman6.png</file>
+        <file>resources/images/pacman/pacman7.png</file>
+        <file>resources/images/pacman/pacman8.png</file>
+        <file>resources/images/pacman/pacman9.png</file>
+        <file>resources/images/pacman/pacman10.png</file>
+        <file>resources/images/pacman/pacman11.png</file>
+        <file>resources/images/pacman/pacman12.png</file>
+        <file>resources/images/pacman/pacman13.png</file>
+        <file>resources/images/pacman/pacman14.png</file>
     </qresource>
 </RCC>

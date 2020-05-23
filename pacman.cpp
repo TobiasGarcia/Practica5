@@ -6,9 +6,6 @@ Pacman::Pacman(short width_game, short height_game) {
     setSceneRect(0, 0, width_game, height_game);
     make_maze(x_maze, y_maze);
 
-    player = new Player(x_maze, y_maze);
-    score = new Score();
-
     eyes = new QPixmap[4];
     eyes[0] = QPixmap(":/images/resources/images/ghosts/eyesU.png");
     eyes[1] = QPixmap(":/images/resources/images/ghosts/eyesL.png");
@@ -19,40 +16,49 @@ Pacman::Pacman(short width_game, short height_game) {
     scared_ghost[0] = QPixmap(":/images/resources/images/ghosts/scared1.png");
     scared_ghost[1] = QPixmap(":/images/resources/images/ghosts/scared2.png");
 
-    blinky = new Ghost(x_maze, y_maze, eyes, scared_ghost, 0);
-    pinky = new Ghost(x_maze, y_maze, eyes, scared_ghost, 1);
-    inky = new Ghost(x_maze, y_maze, eyes, scared_ghost, 2);
-    clyde = new Ghost(x_maze, y_maze, eyes, scared_ghost, 3);
-
+    score = new Score();
     addItem(score);
-    addItem(player);
 
-    addItem(blinky);
-    addItem(pinky);
-    addItem(inky);
-    addItem(clyde);
+    create_characters();
+    set_freeze(true);
+
+    blinky->setPos(x_maze + 225, y_maze + 175);
+    pinky->setPos(x_maze + 225, y_maze + 225);
+    inky->setPos(x_maze + 250, y_maze + 225);
+    clyde->setPos(x_maze + 200, y_maze + 225);
 
     //addItem(blinky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     //addItem(pinky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     //addItem(inky->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     //addItem(clyde->target);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+}
+
+void Pacman::create_characters() {
+
+    player = new Player(x_maze, y_maze);
+
+    blinky = new Ghost(x_maze, y_maze, eyes, scared_ghost, 0);
+    pinky = new Ghost(x_maze, y_maze, eyes, scared_ghost, 1);
+    inky = new Ghost(x_maze, y_maze, eyes, scared_ghost, 2);
+    clyde = new Ghost(x_maze, y_maze, eyes, scared_ghost, 3);
+
+    block1 = new QGraphicsPixmapItem(QPixmap(":/images/resources/images/walls/empty.png"));
+    block1->setPos(x_maze - 25, y_maze + 225);
+
+    block2 = new QGraphicsPixmapItem(QPixmap(":/images/resources/images/walls/empty.png"));
+    block2->setPos(x_maze + 475, y_maze + 225);
+
+    add_characters();
 
     player->setFlag(QGraphicsItem::ItemIsFocusable);
     player->setFocus();
 
-    block1 = new QGraphicsPixmapItem(QPixmap(":/images/resources/images/walls/empty.png"));
-    block1->setPos(x_maze - 25, y_maze + 225);
-    addItem(block1);
-
-    block2 = new QGraphicsPixmapItem(QPixmap(":/images/resources/images/walls/empty.png"));
-    block2->setPos(x_maze + 475, y_maze + 225);
-    addItem(block2);
-
+    connect(player, &Player::begin, this, &Pacman::begin_game);
     connect(player, &Player::earn_point, score, &Score::increase_score);
 
     connect(player, &Player::new_target, blinky, &Ghost::update_target);
     connect(player, &Player::new_target, pinky, &Ghost::update_target);
-    connect(player, &Player::new_target, inky, &Ghost::update_target);
+    connect(blinky, &Ghost::blinky_pos, inky, &Ghost::inky_target);
     connect(player, &Player::new_target, clyde, &Ghost::update_target);
 
     connect(player, &Player::scare_ghosts, blinky, &Ghost::scare);
@@ -60,7 +66,8 @@ Pacman::Pacman(short width_game, short height_game) {
     connect(player, &Player::scare_ghosts, inky, &Ghost::scare);
     connect(player, &Player::scare_ghosts, clyde, &Ghost::scare);
 
-    connect(blinky, &Ghost::blinky_pos, inky, &Ghost::inky_target);
+    connect(player, &Player::touched_ghost, this, &Pacman::to_lose);
+    connect(player, &Player::no_points_left, this, &Pacman::to_win);
 }
 
 Pacman::~Pacman() {
@@ -76,9 +83,55 @@ Pacman::~Pacman() {
     delete block2;
 }
 
+void Pacman::to_lose() {
+
+    set_freeze(true);
+    delay(1000);
+    remove_characters();
+
+    player->lose_animation();
+    removeItem(player);
+
+    delay(1000);
+
+    initilize_characters();
+    add_characters();
+
+    player->setFlag(QGraphicsItem::ItemIsFocusable);
+    player->setFocus();
+}
+
+void Pacman::to_win() {
+
+    set_freeze(true);
+
+    qDebug() << "WIN";
+}
+
+void Pacman::begin_game() {
+
+    blinky->setPos(x_maze + 175, y_maze + 175);
+    pinky->setPos(x_maze + 200, y_maze + 175);
+    inky->setPos(x_maze + 250, y_maze + 175);
+    clyde->setPos(x_maze + 275, y_maze + 175);
+
+    qDebug() << "READY?";
+
+    delay(1000);
+
+    qDebug() << "BEGIN";
+    set_freeze(false);
+}
+
+//void Pacman::decrease_points_left(short points) {
+//    if (points != 200) {
+//        points_left--;
+//        if (points_left == 0) win();
+//    }
+//}
+
 void Pacman::make_maze(short x_maze, short y_maze) {
 
-    qDebug() << "NOTHING";
     short maze_info[21][19] = {{ 5,  3,  3,  3,  3,  3,  3,  3,  3, 10,  3,  3,  3,  3,  3,  3,  3,  3,  6},
                                { 4,  1,  1,  1,  1,  1,  1,  1,  1, 13,  1,  1,  1,  1,  1,  1,  1,  1,  4},
                                { 4,  2, 25, 23,  1, 25, 12, 23,  1, 24,  1, 25, 12, 23,  1, 25, 23,  2,  4},
@@ -118,6 +171,45 @@ void Pacman::make_maze(short x_maze, short y_maze) {
     addItem(new Wall(x_maze + 475, y_maze + 250, 27));
 }
 
+void Pacman::remove_characters() {
+    removeItem(blinky);
+    removeItem(pinky);
+    removeItem(inky);
+    removeItem(clyde);
+
+    removeItem(block1);
+    removeItem(block2);
+}
+
+void Pacman::set_freeze(bool freeze) {
+    player->set_freeze(freeze);
+
+    blinky->set_freeze(freeze);
+    pinky->set_freeze(freeze);
+    inky->set_freeze(freeze);
+    clyde->set_freeze(freeze);
+}
+
+void Pacman::initilize_characters() {
+    player->initialize();
+
+    blinky->initialize();
+    pinky->initialize();
+    inky->initialize();
+    clyde->initialize();
+}
+
+void Pacman::add_characters() {
+    addItem(player);
+
+    addItem(blinky);
+    addItem(pinky);
+    addItem(inky);
+    addItem(clyde);
+
+    addItem(block1);
+    addItem(block2);
+}
 
 
 

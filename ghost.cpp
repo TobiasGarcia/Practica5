@@ -11,13 +11,7 @@ Ghost::Ghost(short _x_maze, short _y_maze, QPixmap *_eyes, QPixmap *_scared_ghos
     x_maze = _x_maze;
     y_maze = _y_maze;
 
-    x_tar = x_maze + 225;
-    y_tar = y_maze + 375;
-
     id = _id;
-
-    if (id == 0) dir = 1;
-    else dir = 3;
 
     eyes = _eyes;
     scared_ghost = _scared_ghost;
@@ -40,9 +34,6 @@ Ghost::Ghost(short _x_maze, short _y_maze, QPixmap *_eyes, QPixmap *_scared_ghos
         sheets[1] = QPixmap(":/images/resources/images/ghosts/blinky2.png");
     }
 
-    setPixmap(sheets[0]);
-    setPos(x_maze + 225, y_maze + 175);
-
     //target = new QGraphicsPixmapItem;//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     //target->setPixmap(sheets[0]);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
@@ -50,12 +41,14 @@ Ghost::Ghost(short _x_maze, short _y_maze, QPixmap *_eyes, QPixmap *_scared_ghos
     scare_timer = new QTimer;
     animation_timer = new QTimer;
 
+    initialize();
+
     connect(move_timer, &QTimer::timeout, this, &Ghost::move);
     connect(animation_timer, &QTimer::timeout, this, &Ghost::animate_ghost);
     connect(scare_timer, &QTimer::timeout, this, &Ghost::normal_ghost);
 
-    move_timer->start(1000/30);
     animation_timer->start(100);
+    move_timer->start(1000/30);
 }
 
 Ghost::~Ghost() {
@@ -66,14 +59,28 @@ Ghost::~Ghost() {
     //delete target;//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 }
 
-//----------------------------------------------------------------MOVIMIENTO
+void Ghost::initialize() {
 
-float Ghost::calculate_dist(short x, short y, short x_tar, short y_tar) {
+    state = 0;
+    freeze = true;
+    pixels = 5;
+    sheet_bool = true;
 
-    //Calculamos la distancia para ir por líneas rectas.
+    x_tar = x_maze + 225;
+    y_tar = y_maze + 375;
 
-    return (sqrt(pow(y_tar - y, 2) + pow(x_tar - x, 2)));
+    if ((id == 0) or (id == 1)) dir = 1;
+    else dir = 3;
+
+    setPixmap(sheets[0]);
+
+    if (id == 3) setPos(x_maze + 275, y_maze + 175);
+    else if (id == 2) setPos(x_maze + 250, y_maze + 175);
+    else if (id == 1) setPos(x_maze + 200, y_maze + 175);
+    else setPos(x_maze + 175, y_maze + 175);
 }
+
+//----------------------------------------------------------------MOVIMIENTO
 
 void Ghost::stop(short x_wall, short y_wall, short width_wall, short height_wall) {
 
@@ -174,6 +181,13 @@ void Ghost::update_target(short x_pac, short y_pac, short dir_pac) {
 
 void Ghost::move() {
 
+    if (freeze) {
+        sheet_bool = !sheet_bool;
+        if (state == 1) setPixmap(scared_ghost[sheet_bool]);
+        else if (state == 0) setPixmap(sheets[sheet_bool]);
+        return;
+    }
+
     if ((state == 2) and ((x() == (x_maze + 225)) and (y() == (y_maze + 175)))) normal_ghost();
 
     if ((x() == (x_maze + 475)) and (y() == (y_maze + 225))) setPos(x_maze - 25, y());
@@ -186,6 +200,7 @@ void Ghost::move() {
         auto item = collisions.at(i);
         //LONGITUD DE LAS PAREDES.
         if (typeid(*item) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y(), 25, 25);
+        //else if (typeid(*item) == typeid(Ghost)) fit_tile();
     }
 
     choose_dir();
@@ -193,6 +208,12 @@ void Ghost::move() {
     else if (move_dir.at(1)) setPos(x() - pixels, y());
     else if (move_dir.at(2)) setPos(x(), y() + pixels);
     else setPos(x() + pixels, y());
+}
+
+void Ghost::set_freeze(bool _freeze) {
+
+    freeze = _freeze;
+    if (freeze) scare_timer->stop();
 }
 
 //----------------------------------------------------------------COLISIONES
@@ -256,4 +277,13 @@ void Ghost::normal_ghost() {
     fit_tile();
     pixels = 5;
     scare_timer->stop();
+}
+
+
+
+float calculate_dist(short x, short y, short x_tar, short y_tar) {
+
+    //Calculamos la distancia para ir por líneas rectas.
+
+    return (sqrt(pow(y_tar - y, 2) + pow(x_tar - x, 2)));
 }
