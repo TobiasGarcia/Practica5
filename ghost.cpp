@@ -1,23 +1,45 @@
 #include "ghost.h"
 
-//-------------------------------------------------------------------GENERAL
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------GENERAL-----------------------------------------
+//-----------------------------------------------------------------------------------------
 
 QRectF Ghost::boundingRect() const {
     return QRectF(-1, -1, 27, 27);
 }
 
-Ghost::Ghost(short _x_maze, short _y_maze, QPixmap *_eyes, QPixmap *_scared_ghost, short _id) {
+void Ghost::initialize() {
 
-    x_maze = _x_maze;
-    y_maze = _y_maze;
+    state = 0;
+    pixels = 5;
+    freeze = true;
+    sheet_bool = true;
 
-    x_tar = x_maze + 225;
-    y_tar = y_maze + 375;
+    setPixmap(sheets[0]);
+
+    if (id == 3) setPos(X_MAZE + 275, Y_MAZE + 175);
+    else if (id == 2) setPos(X_MAZE + 250, Y_MAZE + 175);
+    else if (id == 1) setPos(X_MAZE + 200, Y_MAZE + 175);
+    else setPos(X_MAZE + 175, Y_MAZE + 175);
+
+    x_tar = X_MAZE + 225;
+    y_tar = Y_MAZE + 375;
+
+#if GHOSTS_TARGETS == 1
+    target->setPos(x_tar, y_tar);
+    target->setZValue(1);
+#endif
+
+    if ((id == 0) or (id == 1)) dir = 1;
+    else dir = 3;
+}
+
+Ghost::Ghost(QPixmap *_eyes, QPixmap *_scared_ghost, short _id) {
 
     id = _id;
 
-    if (id == 0) dir = 1;
-    else dir = 3;
+    width = 25;
+    height = 25;
 
     eyes = _eyes;
     scared_ghost = _scared_ghost;
@@ -40,51 +62,38 @@ Ghost::Ghost(short _x_maze, short _y_maze, QPixmap *_eyes, QPixmap *_scared_ghos
         sheets[1] = QPixmap(":/images/resources/images/ghosts/blinky2.png");
     }
 
-    setPixmap(sheets[0]);
-    setPos(x_maze + 225, y_maze + 175);
-
-    //target = new QGraphicsPixmapItem;//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    //target->setPixmap(sheets[0]);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#if GHOSTS_TARGETS == 1
+    target = new QGraphicsPixmapItem;
+    target->setPixmap(sheets[0]);
+#endif
 
     move_timer = new QTimer;
     scare_timer = new QTimer;
     animation_timer = new QTimer;
 
     connect(move_timer, &QTimer::timeout, this, &Ghost::move);
-    connect(animation_timer, &QTimer::timeout, this, &Ghost::animate_ghost);
     connect(scare_timer, &QTimer::timeout, this, &Ghost::normal_ghost);
+    connect(animation_timer, &QTimer::timeout, this, &Ghost::animate_ghost);
 
-    move_timer->start(1000/30);
+    initialize();
+
+    move_timer->start(1000/30); //30 fps
     animation_timer->start(100);
 }
 
 Ghost::~Ghost() {
     delete move_timer;
     delete scare_timer;
-    delete[] sheets;
     delete animation_timer;
-    //delete target;//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    delete[] sheets;
+#if GHOSTS_TARGETS == 1
+    delete target;
+#endif
 }
 
-//----------------------------------------------------------------MOVIMIENTO
-
-float Ghost::calculate_dist(short x, short y, short x_tar, short y_tar) {
-
-    //Calculamos la distancia para ir por líneas rectas.
-
-    return (sqrt(pow(y_tar - y, 2) + pow(x_tar - x, 2)));
-}
-
-void Ghost::stop(short x_wall, short y_wall, short width_wall, short height_wall) {
-
-    short x_left = (x_wall - width), x_right = (x_wall + width_wall),
-            y_up = (y_wall - height), y_down = (y_wall + height_wall);
-
-    if ((y() == y_up) and (x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
-    if ((y() == y_down) and (x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
-    if ((x() == x_left) and (y() != y_up) and (y() != y_down)) move_dir.at(3) = false;
-    if ((x() == x_right) and (y() != y_up) and (y() != y_down)) move_dir.at(1) = false;
-}
+//-----------------------------------------------------------------------------------------
+//---------------------------------MOVIMIENTO Y COLISIONES---------------------------------
+//-----------------------------------------------------------------------------------------
 
 void Ghost::blinky_target(short x_pac, short y_pac) {
 
@@ -92,13 +101,17 @@ void Ghost::blinky_target(short x_pac, short y_pac) {
 
     x_tar = x_pac;
     y_tar = y_pac;
-    //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#if GHOSTS_TARGETS == 1
+    target->setPos(x_tar, y_tar);
+#endif
 }
 
 void Ghost::pinky_target(short x_pac, short y_pac, short dir_pac) {
     x_tar = x_pac + 40*gap[dir_pac];
     y_tar = y_pac + 40*gap[(dir_pac + 1)%4];
-    //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#if GHOSTS_TARGETS == 1
+    target->setPos(x_tar, y_tar);
+#endif
 }
 
 void Ghost::inky_target(short x_pac, short y_pac, short x_blin, short y_blin, short dir_pac) {
@@ -115,7 +128,9 @@ void Ghost::inky_target(short x_pac, short y_pac, short x_blin, short y_blin, sh
 
         x_tar = 2*x_tar - x_blin;
         y_tar = 2*y_tar - y_blin;
-        //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#if GHOSTS_TARGETS == 1
+        target->setPos(x_tar, y_tar);
+#endif
     }
 }
 
@@ -126,15 +141,31 @@ void Ghost::clyde_target(short x_pac, short y_pac) {
         y_tar = y_pac;
     }
     else {
-        x_tar = x_maze;
-        y_tar = y_maze + 525;
+        x_tar = X_MAZE;
+        y_tar = Y_MAZE + 525;
     }
-    //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#if GHOSTS_TARGETS == 1
+    target->setPos(x_tar, y_tar);
+#endif
+}
+
+void Ghost::update_target(short x_pac, short y_pac, short dir_pac) {
+
+    //La señal binky_pos() lo utilizamos para activar el slot
+    //inky_target del fantasma Inky, pues éste última necesita
+    //la posición de Blinky para poder definir su target.
+
+    if (id == 0) emit blinky_pos(x_pac, y_pac, x(), y(), dir_pac);
+    if (!state) {
+        if (id == 3) clyde_target(x_pac, y_pac);
+        else if (id == 1) pinky_target(x_pac, y_pac, dir_pac);
+        else if (id == 0) blinky_target(x_pac, y_pac);
+    }
 }
 
 void Ghost::choose_dir() {
 
-    short min;
+    short min = (dir + 2)%4;
     float min_dist = 2048, dist;
 
     for (short i = 0; i < 4; i++) {
@@ -156,50 +187,9 @@ void Ghost::choose_dir() {
     dir = min;
 }
 
-void Ghost::update_target(short x_pac, short y_pac, short dir_pac) {
-
-    //La señal binky_pos() lo utilizamos para activar el slot
-    //inky_target del fantasma Inky, pues éste última necesita
-    //la posición de Blinky para poder definir su target.
-
-    if (!state) {
-        if (id == 3) clyde_target(x_pac, y_pac);
-        else if (id == 1) pinky_target(x_pac, y_pac, dir_pac);
-        else if (id == 0) {
-            blinky_target(x_pac, y_pac);
-            emit blinky_pos(x_pac, y_pac, x(), y(), dir_pac);
-        }
-    }
-}
-
-void Ghost::move() {
-
-    if ((state == 2) and ((x() == (x_maze + 225)) and (y() == (y_maze + 175)))) normal_ghost();
-
-    if ((x() == (x_maze + 475)) and (y() == (y_maze + 225))) setPos(x_maze - 25, y());
-    else if ((x() == (x_maze - 25)) and (y() == (y_maze + 225))) setPos(x_maze + 475, y());
-
-    move_dir.fill(true);
-
-    collisions = collidingItems(Qt::IntersectsItemBoundingRect);
-    for (short i = 0; i < collisions.size(); i++) {
-        auto item = collisions.at(i);
-        //LONGITUD DE LAS PAREDES.
-        if (typeid(*item) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y(), 25, 25);
-    }
-
-    choose_dir();
-    if (move_dir.at(0)) setPos(x(), y() - pixels);
-    else if (move_dir.at(1)) setPos(x() - pixels, y());
-    else if (move_dir.at(2)) setPos(x(), y() + pixels);
-    else setPos(x() + pixels, y());
-}
-
-//----------------------------------------------------------------COLISIONES
-
 void Ghost::fit_tile() {
 
-    short x_rem = (short(x()) - x_maze)%25, y_rem = (short(y()) - y_maze)%25;
+    short x_rem = (short(x()) - X_MAZE)%25, y_rem = (short(y()) - Y_MAZE)%25;
 
     if (x_rem < 13) setPos(short(x()) - x_rem, y());
     else setPos(short(x()) - x_rem + 25, y());
@@ -218,8 +208,12 @@ void Ghost::scare() {
     //Reflejamos el target con respecto al
     //centro del laberinto.
 
-    x_tar = 2*(x_maze + 225) - x_tar;
-    y_tar = 2*(y_maze + 250) - y_tar;
+    x_tar = 2*(X_MAZE + 225) - x_tar;
+    y_tar = 2*(Y_MAZE + 250) - y_tar;
+
+#if GHOSTS_TARGETS == 1
+    target->setPos(x_tar, y_tar);
+#endif
 }
 
 void Ghost::go_home() {
@@ -232,11 +226,86 @@ void Ghost::go_home() {
     //Apuntamos el target hacia la puerta
     //de la casa de los fantasmas.
 
-    x_tar = x_maze + 225;
-    y_tar = y_maze + 175;
+    x_tar = X_MAZE + 225;
+    y_tar = Y_MAZE + 175;
 
-    //target->setPos(x_tar, y_tar);//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#if GHOSTS_TARGETS == 1
+    target->setPos(x_tar, y_tar);
+#endif
 }
+
+void Ghost::normal_ghost() {
+    state = 0;
+    fit_tile();
+    pixels = 5;
+    scare_timer->stop();
+}
+
+void Ghost::set_freeze(bool _freeze) {
+
+    freeze = _freeze;
+    if (freeze) scare_timer->stop();
+}
+
+//Este método puedo haber sido una función implementada en genearl.cpp, pero es
+//mejor que no pues utiliza parametros del objeto, como width, height, x() e y().
+
+void Ghost::stop(short x_wall, short y_wall) {
+
+    //Colisión con paredes de 25 x 25 pixeles.
+
+    //Para entender el funcionamiento del método ver la documentación
+    //de la implementación de éste método para la clase Player.
+
+    short x_left = (x_wall - width), x_right = (x_wall + 25),
+            y_up = (y_wall - height), y_down = (y_wall + 25);
+
+    if ((y() == y_up) and (x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
+    if ((y() == y_down) and (x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
+    if ((x() == x_left) and (y() != y_up) and (y() != y_down)) move_dir.at(3) = false;
+    if ((x() == x_right) and (y() != y_up) and (y() != y_down)) move_dir.at(1) = false;
+}
+
+void Ghost::move() {
+
+    if (freeze) return;
+
+    if ((state == 2) and ((x() == (X_MAZE + 225)) and (y() == (Y_MAZE + 175)))) normal_ghost();
+
+    if ((x() == (X_MAZE + 475)) and (y() == (Y_MAZE + 225))) setPos(X_MAZE - 25, y());
+    else if ((x() == (X_MAZE - 25)) and (y() == (Y_MAZE + 225))) setPos(X_MAZE + 475, y());
+
+    move_dir.fill(true);
+
+    collisions = collidingItems(Qt::IntersectsItemBoundingRect);
+    for (short i = 0; i < collisions.size(); i++) {
+
+        //La sentencia del siguiente condicional funciona de la misma forma que la siguiente:
+
+        //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions[i]->x(), collisions[i]->y());
+
+        //Pero ésta última provoca una advertencia por parte de Qt, por lo cual
+        //es preferible utilizar la variable intermedia item.
+
+        auto item = collisions.at(i);
+        if (typeid(*item) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y());
+    }
+
+    choose_dir();
+
+    if (move_dir.at(0)) setPos(x(), y() - pixels);
+    else if (move_dir.at(1)) setPos(x() - pixels, y());
+    else if (move_dir.at(2)) setPos(x(), y() + pixels);
+    else setPos(x() + pixels, y());
+
+    //NOTA: Gracias a que el movimiento es tan preciso, hay veces en que un fantasma se coloca encima
+    //de otro y parece que uno de los dos desapareció del laberinto, aunque en realidad es que
+    //uno de ellos simplemente está tapando al otro.
+}
+
+//-----------------------------------------------------------------------------------------
+//----------------------------------------IMÁGENES-----------------------------------------
+//-----------------------------------------------------------------------------------------
 
 void Ghost::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
 
@@ -249,11 +318,4 @@ void Ghost::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     }
     else if (state == 1) painter->drawPixmap(0, 0, scared_ghost[sheet_bool]);
     else painter->drawPixmap(0, 0, eyes[dir]);
-}
-
-void Ghost::normal_ghost() {
-    state = 0;
-    fit_tile();
-    pixels = 5;
-    scare_timer->stop();
 }

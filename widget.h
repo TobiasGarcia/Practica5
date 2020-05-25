@@ -9,8 +9,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
 QT_END_NAMESPACE
 
-class Widget : public QWidget
-{
+class Widget : public QWidget {
+
     Q_OBJECT
 
 public:
@@ -19,7 +19,8 @@ public:
 
 private:
     Ui::Widget *ui;
-    short width_game = 596, height_game = 646;
-    Pacman *pacman = new Pacman(width_game, height_game);
+    Pacman *pacman;
+    short width_game, height_game;
+
 };
 #endif // WIDGET_H

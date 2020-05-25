@@ -9,6 +9,8 @@ Point::Point(short x, short y, short _type) {
 
     type = _type;
 
+    bool_point = true;
+
     if (type == 1) {
         image1 = new QPixmap(":/images/resources/images/points/point.png");
         setPos(x, y);
@@ -37,13 +39,13 @@ Point::~Point() {
 
 void Point::animate() {
     if (bool_point) {
-        setPixmap(*image2);
         bool_point = false;
+        setPixmap(*image2);
         setPos(x() - 2, y() - 2);
     }
     else {
-        setPixmap(*image1);
         bool_point = true;
+        setPixmap(*image1);
         setPos(x() + 2, y() + 2);
     }
 }

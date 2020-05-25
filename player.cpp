@@ -1,40 +1,81 @@
 #include "player.h"
-#include <QGraphicsScene>
-#include <QKeyEvent>
-#include <QDebug>
-#include <typeinfo>
-#include "wall.h"
-#include "point.h"
-#include <QDebug>
+
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------GENERAL-----------------------------------------
+//-----------------------------------------------------------------------------------------
 
 QRectF Player::boundingRect() const {
     return QRectF(-1, -1, 27, 27);
 }
 
-Player::Player(short _x_maze, short _y_maze) {
+void Player::focusOutEvent(QFocusEvent *event) {
+    Q_UNUSED(event);
+    setFocus();
+}
 
-    x_maze = _x_maze;
-    y_maze = _y_maze;
+void Player::initialize() {
 
-    script = new QPixmap[3];
-    script[0] = QPixmap(":/images/resources/images/pacman/pacman1.png");
-    script[1] = QPixmap(":/images/resources/images/pacman/pacman2.png");
-    script[2] = QPixmap(":/images/resources/images/pacman/pacman3.png");
+    is_playing = false;
 
-
-    setPixmap(script[0]);
-    setPos(x_maze + 225, y_maze + 375);
+    dir = 0;
+    tp = false;
+    freeze = true;
+    last_presesed = 0;
 
     pressed_dir.fill(false);
     move_dir.fill(false);
 
-    connect(timer, &QTimer::timeout, this, &Player::move);
-    timer->start(1000/30); //30 fps
+    num_script = 0;
+
+    setPixmap(script[0]);
+    setPos(X_MAZE + 225, Y_MAZE + 375);
 }
+
+Player::Player() {
+
+    width = 25;
+    height = 25;
+
+    points_left = 150;
+
+    pixels = 5;
+
+    script = new QPixmap[15];
+    script[0] = QPixmap(":/images/resources/images/pacman/pacman1.png");
+    script[1] = QPixmap(":/images/resources/images/pacman/pacman2.png");
+    script[2] = QPixmap(":/images/resources/images/pacman/pacman3.png");
+    script[3] = QPixmap(":/images/resources/images/pacman/pacman4.png");
+    script[4] = QPixmap(":/images/resources/images/pacman/pacman5.png");
+    script[5] = QPixmap(":/images/resources/images/pacman/pacman6.png");
+    script[6] = QPixmap(":/images/resources/images/pacman/pacman7.png");
+    script[7] = QPixmap(":/images/resources/images/pacman/pacman8.png");
+    script[8] = QPixmap(":/images/resources/images/pacman/pacman9.png");
+    script[9] = QPixmap(":/images/resources/images/pacman/pacman10.png");
+    script[10] = QPixmap(":/images/resources/images/pacman/pacman11.png");
+    script[11] = QPixmap(":/images/resources/images/pacman/pacman12.png");
+    script[12] = QPixmap(":/images/resources/images/pacman/pacman13.png");
+    script[13] = QPixmap(":/images/resources/images/pacman/pacman14.png");
+    script[14] = QPixmap(":/images/resources/images/walls/empty.png");
+
+    move_timer = new QTimer;
+    connect(move_timer, &QTimer::timeout, this, &Player::move);
+
+    initialize();
+
+    move_timer->start(1000/30); //30 fps
+}
+
+//-----------------------------------------------------------------------------------------
+//---------------------------------MOVIMIENTO Y COLISIONES---------------------------------
+//-----------------------------------------------------------------------------------------
 
 void Player::keyPressEvent(QKeyEvent *event) {
 
-    //move_dir [UP, LEFT, DOWN, RIGHT]
+    if (!is_playing) {
+        is_playing = true;
+        emit begin();
+        return;
+    }
 
     if ((event->key() == Qt::Key_Up) and !event->isAutoRepeat()) {
         pressed_dir.at(0) = true;
@@ -64,37 +105,36 @@ void Player::keyReleaseEvent(QKeyEvent *event) {
     if ((event->key() == Qt::Key_Right) and !event->isAutoRepeat()) pressed_dir.at(3) = false;
 }
 
-//Pinta un pixel más!
+void Player::stop(short x_wall, short y_wall) {
 
-//La idea es NO bloquear nada cuando se esté en los O.
+    //La forma en que se bloquea el movimiento según las colisiones consiste en que si
+    //la intersección entre el objeto (jugador o fantasma) y la pared es un único pixel,
+    //es decir, la intersección se dio en una de las esquina (en las Os de la figura),
+    //el movimiento no se bloquea en ninguna dirección; por otra parte si la
+    //intersección es de más de un pixel, es decir, hay una parte que
+    //intersecta uno de los ■s de la figura, el movimiento se
+    //dependiendo del lado por donde se presentó la colisión.
 
-//O ■ ■ ■ O
-//■       ■
-//■       ■
-//■       ■
-//O ■ ■ ■ O
+    //O ■ ■ ■ O
+    //■       ■
+    //■       ■
+    //■       ■
+    //O ■ ■ ■ O
 
-void Player::stop(short x_wall, short y_wall, short width_wall, short height_wall) {
+    //NOTA: Ésta sólo es una figura ilustrativa, en realidad los fantasmas y el jugador
+    //poseen dimensiones de 25 x 25 pixeles.
 
-    short x_left = (x_wall - width), x_right = (x_wall + width_wall),
-            y_up = (y_wall - height), y_down = (y_wall + height_wall);
+    //Las variables x_left, x_right, y_left e y_right son calculadas de esta manera
+    //para que cubran un rectangulo mayor que sólo los pixeles de la pared.
+    //Ésto es realizado con el propósito de compensar el hecho de que
+    //la posición del jugador o del fantasma es representada por el
+    //pixel que se encuentra en la esquina superior izquierda de
+    //su imagen.
 
-//    if (y() == y_up) {
-//        if ((x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
-//        else if ((x() == x_left) and move_dir.at(2) and move_dir.at(3)) move_dir.at(2) = false;
-//        else if ((x() == x_right) and move_dir.at(2) and move_dir.at(1)) move_dir.at(2) = false;
-//    }
-//    else if (y() == y_down) {
-//        if ((x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
-//        else if ((x() == x_left) and move_dir.at(0) and move_dir.at(3)) move_dir.at(0) = false;
-//        else if ((x() == x_right) and move_dir.at(0) and move_dir.at(1)) move_dir.at(0) = false;
-//    }
-//    else if (x() == x_right) move_dir.at(1) = false;
-//    else if (x() == x_left) move_dir.at(3) = false;
+    //Colisión con paredes de 25 x 25 pixeles.
 
-    //Esto causaba el bug de atravesar las paredes por las esquinas.
-
-    //qDebug() << x_wall << "   " << y_wall << "        " <<  x() << y();
+    short x_left = (x_wall - width), x_right = (x_wall + 25),
+            y_up = (y_wall - height), y_down = (y_wall + 25);
 
     if ((y() == y_up) and (x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
     if ((y() == y_down) and (x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
@@ -103,42 +143,32 @@ void Player::stop(short x_wall, short y_wall, short width_wall, short height_wal
     if ((x() == x_right) and (y() != y_up) and (y() != y_down)) move_dir.at(1) = false;
 }
 
-void Player::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-
-    Q_UNUSED(option);
-    Q_UNUSED(widget);
-
-    painter->translate(13, 13);
-    painter->rotate(-dir*90);
-    painter->translate(-13, -13);
-    painter->drawPixmap(2, 2, script[num_script]);
-
-
-//    if (state == 0) {
-//        painter->drawPixmap(0, 0, sheets[sheet_bool]);
-//        painter->drawPixmap(0, 0, eyes[dir]);
-//    }
-//    else if (state == 1) painter->drawPixmap(0, 0, scared_ghost[sheet_bool]);
-//    else painter->drawPixmap(0, 0, eyes[dir]);
-}
-
 void Player::move() {
+
+    if (freeze) return;
 
     move_dir = pressed_dir;
 
     collisions = collidingItems(Qt::IntersectsItemBoundingRect);
     for (short i = 0; i < collisions.size(); i++) {
 
-        //Genera una advertencia.
-        //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions[i]->x(), collisions[i]->y(), 25, 25);
+        //La sentencia del siguiente condicional funciona de la misma forma que la siguiente:
+
+        //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions[i]->x(), collisions[i]->y());
+
+        //Pero ésta última provoca una advertencia por parte de Qt, por lo cual
+        //es preferible utilizar la variable intermedia item.
 
         auto item = collisions.at(i);
-        //LONGITUD DE LAS PAREDES.
-        if (typeid(*item) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y(), 25, 25);
+        if (typeid(*item) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y());
         else if (typeid(*item) == typeid(Point)) {
 
-            //Para poder bajar en la jerarquia de las clases, en éste caso
-            //bajar de QGraphicsItem* a Point*.
+            //La línea:
+
+            //Point *point = dynamic_cast<Point*>(item);
+
+            //Es utilizada para poder bajar en la jerarquía de las clases,
+            //en éste caso bajar de QGraphicsItem* a Point*.
 
             Point *point = dynamic_cast<Point*>(item);
             if (point->get_type() == 1) emit earn_point(10);
@@ -149,16 +179,42 @@ void Player::move() {
 
             scene()->removeItem(collisions.at(i));
             delete collisions.at(i);
+
+            points_left--;
+            if (points_left == 0) {
+                emit no_points_left();
+                return;
+            }
         }
-        else if (typeid(*item) == typeid(Ghost)) {
+
+        //La parte del < 15 es para que las colisiones con los fantasmas por parte del jugador no
+        //ocurran con sólo tocarlos, sino que tengan que tocar al jugador y estar cerca de él,
+        //esto es porque al momento de cambiar la dirección al girar por las esquinas,
+        //si había un fantasma cerca era casi que una colisión segura; si desea puede
+        //cambiar el 15 por un 30 o algo superior y verá a qué me refiero.
+
+        else if ((typeid(*item) == typeid(Ghost)) and (calculate_dist(collisions.at(i)->x(), collisions.at(i)->y(), x(), y()) < 15)) {
+
             Ghost *ghost = dynamic_cast<Ghost*>(item);
+
             if (ghost->get_state() == 1) {
                 emit earn_point(200);
                 ghost->go_home();
             }
-            else if (ghost->get_state() == 0) qDebug() << "GAME OVER";
+            else if (ghost->get_state() == 0) {
+                emit touched_ghost();
+                return;
+            }
         }
     }
+
+    //La línea num_script = (num_script + 1)%3 debe ir dentro de los condicionales
+    //para que sólo suceda cuando hay movimiento, si lo dejamos por fuera siempre
+    //sucedería, aunque no sería un problema pues como no hay movimiento el
+    //método paint() no se ejecutaría y el pacman no cambiaria de script
+    //cuando permaneciese estático, sin embargo me parece que dejarlo por
+    //fuera de los condicionles, aunque no haga una diferencia aparente,
+    //es un error lógico, por lo cual lo dejé dentro de cada uno de ellos.
 
     if (move_dir.at(last_presesed)) {
         setPos(x() + pixels*gap[last_presesed], y() + pixels*gap[(last_presesed + 1)%4]);
@@ -186,12 +242,24 @@ void Player::move() {
         dir = 3;
     }
 
-    if ((x() == (x_maze + 475)) and (y() == (y_maze + 225)) and !tp) {
-        setPos(x_maze - 25, y());
+    //NOTA: Como el movimiento es tan preciso, al momento de girar por una esquina
+    //o tomar otro camino en una intersección, hay que estar en el pixel exacto
+    //o de lo contrario no se podrá girar. Esto hacía que el juego fuera un
+    //poco difícil, pero para solucionarlo programé que cuando se va en
+    //una dirección, por ejemplo a la derecha, y se mantiene presionada
+    //al mismo tiempo la tecla para ir en otra dirección, hacia arriba
+    //por ejemplo, el personaje tomará el primer giro hacía arriba
+    //que encuentre; el procedimiento es análogo en las
+    //demás direcciones.
+
+    //Esto es del teleport de los costados.
+
+    if ((x() == (X_MAZE + 475)) and (y() == (Y_MAZE + 225)) and !tp) {
+        setPos(X_MAZE - 25, y());
         tp = true;
     }
-    else if ((x() == (x_maze - 25)) and (y() == (y_maze + 225)) and !tp) {
-        setPos(x_maze + 475, y());
+    else if ((x() == (X_MAZE - 25)) and (y() == (Y_MAZE + 225)) and !tp) {
+        setPos(X_MAZE + 475, y());
         tp = true;
     }
 
@@ -200,47 +268,44 @@ void Player::move() {
     emit new_target(x(), y(), last_presesed);
 }
 
+//-----------------------------------------------------------------------------------------
+//----------------------------------------IMÁGENES-----------------------------------------
+//-----------------------------------------------------------------------------------------
 
+void Player::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
 
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
 
+    painter->translate(13, 13);
+    painter->rotate(-dir*90);
+    painter->translate(-13, -13);
+    painter->drawPixmap(2, 2, script[num_script]);
+}
 
+void Player::win_animation() {
 
+    dir = 3;
+    num_script = 1; update(); delay(150);
 
+    for (short i = 0; i < 3; i++) {
+        for (num_script = 0; num_script < 3; num_script++) {
+            update();
+            delay(150);
+        }
+    }
 
+    num_script = 1;
+    update();
+}
 
+void Player::lose_animation() {
 
+    for (num_script = 0; num_script < 14; num_script++) {
+        update();
+        delay(150);
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    update();
+    is_playing = false;
+}
