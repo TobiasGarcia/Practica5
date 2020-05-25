@@ -13,10 +13,11 @@ Message::Message() {
 
 void Message::press_key_msg() {
     setPlainText(QString("Press any key to start"));
-    setPos(120, 600);
+    setPos(X_MAZE + 60, Y_MAZE + 540);
     blink_bool = true;
     timer->start(500);
 }
+
 void Message::blink() {
     if (blink_bool) {
         setDefaultTextColor(Qt::black);
@@ -32,15 +33,20 @@ void Message::ready_msg() {
     timer->stop();
     setDefaultTextColor(Qt::yellow);
     setPlainText(QString("Ready?"));
-    setPos(248, 337);
+    setPos(X_MAZE + 188, Y_MAZE + 277);
 }
 
 void Message::go_msg() {
     setPlainText(QString("Go!"));
-    setPos(274, 337);
+    setPos(X_MAZE + 214, Y_MAZE + 277);
 }
 
 void Message::win_msg() {
     setPlainText(QString("You win!"));
-    setPos(233, 240);
+    setPos(X_MAZE + 173, Y_MAZE + 180);
+}
+
+void Message::game_over_msg() {
+    setPlainText(QString("Game Over"));
+    setPos(X_MAZE + 162, Y_MAZE + 180);
 }

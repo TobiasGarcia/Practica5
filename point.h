@@ -10,17 +10,16 @@ class Point: public QObject, public QGraphicsPixmapItem {
 
 private:
     short type;
-    short width = 3, height = 3;
-    QPixmap *image1, *image2;
-    bool bool_point = false;
     QTimer *timer;
+    bool bool_point;
+    QPixmap *image1, *image2;
 
     QRectF boundingRect() const;
 
 public:
-    Point(short x, short y, short _type = 1);
-    ~Point();;
     short get_type() {return type;};
+    Point(short x, short y, short _type = 1);
+    ~Point();
 
 public slots:
     void animate();

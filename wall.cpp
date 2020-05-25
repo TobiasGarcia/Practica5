@@ -1,6 +1,4 @@
 #include "wall.h"
-#include <typeinfo>
-#include <QDebug>
 
 QRectF Wall::boundingRect() const {
     return QRectF(0, 0, 25, 25);

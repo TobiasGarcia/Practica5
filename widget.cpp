@@ -7,6 +7,9 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
 
+    width_game = 596;
+    height_game = 646;
+
     layout()->setMargin(0);
     setFixedSize(width_game, height_game);
 
@@ -15,6 +18,7 @@ Widget::Widget(QWidget *parent)
     ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+    pacman = new Pacman(width_game, height_game);
     ui->graphicsView->setScene(pacman);
 }
 

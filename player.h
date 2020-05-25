@@ -2,64 +2,91 @@
 #define PLAYER_H
 
 #include <QGraphicsPixmapItem>
+#include <QGraphicsScene>
+#include <QKeyEvent>
+#include <typeinfo>
 #include <QTimer>
 #include <array>
+#include "wall.h"
+#include "point.h"
 #include "ghost.h"
-#include <QDebug>
-#include <QTime>
-#include <QCoreApplication>
 
 class Player: public QObject, public QGraphicsPixmapItem {
 
     Q_OBJECT
 
-private:
+//-----------------------------------------------------------------------------------------
+//-----------------------------------------GENERAL-----------------------------------------
+//-----------------------------------------------------------------------------------------
 
-    bool is_playing = false;
+private:
+    bool is_playing;
+    short width, height, points_left;
+
     QRectF boundingRect() const;
 
-    QPixmap *script;
-    short dir = 0;
+public:
 
-    short points_left = 150; //150
+    Player();
+    void initialize();
+    void focusOutEvent(QFocusEvent *event);
+    ~Player() {delete move_timer; delete[] script;};
 
-    bool tp = false, freeze;
-    short width = 25, height = 25, pixels = 5, last_presesed = 0,
-    x_maze, y_maze, gap[4] = {0, -1, 0, 1};
-    //move_dir [UP, LEFT, DOWN, RIGHT]
-    std::array<bool, 4> pressed_dir, move_dir;
-    QTimer *timer = new QTimer;
+signals:
+    void begin();
+    void no_points_left();
+    void earn_point(short points);
+
+//-----------------------------------------------------------------------------------------
+//---------------------------------MOVIMIENTO Y COLISIONES---------------------------------
+//-----------------------------------------------------------------------------------------
+
+private:
+    bool tp, freeze;
+    QTimer *move_timer;
     QList <QGraphicsItem*> collisions;
+    std::array<bool, 4> pressed_dir, move_dir;
+    short pixels, last_presesed, dir, gap[4] = {0, -1, 0, 1};
 
+    void stop(short x_wall, short y_wall);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
-    void stop(short x_wall, short y_wall, short width_wall, short height_wall);
+
+    //NOTA: En los arrays pressed_dir y move_dir, la correspondencia entre las
+    //direcciones y los índices es la siguiente:
+
+    //0: Arriba
+    //1: Izquierda
+    //2: Abajo
+    //3: Derecha
+
+public:
+    void set_freeze(bool _freeze) {freeze = _freeze;};
+
+signals:
+    void scare_ghosts();
+    void touched_ghost();
+    void new_target(short x_pac, short y_pac, short dir_pac);
+
+public slots:
+    void move();
+
+//-----------------------------------------------------------------------------------------
+//----------------------------------------IMÁGENES-----------------------------------------
+//-----------------------------------------------------------------------------------------
+
+private:
+    QPixmap *script;
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 public:
-    short num_script = 0;
+    short num_script;
 
-    Player(short _x_maze, short _y_maze);
-    ~Player() {delete timer; delete[] script;};
-    void focusOutEvent(QFocusEvent *event);
-    void set_freeze(bool _freeze) {freeze = _freeze;};
-    void initialize();
     void win_animation();
 
-signals:
-    void earn_point(short points);
-    void new_target(short x_pac, short y_pac, short dir_pac);
-    void scare_ghosts();
-    void touched_ghost();
-    void no_points_left();
-    void begin();
-
 public slots:
-    void move();
     void lose_animation();
 };
-
-void delay(short mili);
 
 #endif // PLAYER_H

@@ -16,6 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    general.cpp \
     ghost.cpp \
     main.cpp \
     message.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
     widget.cpp
 
 HEADERS += \
+    general.h \
     ghost.h \
     message.h \
     pacman.h \

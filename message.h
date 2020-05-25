@@ -2,9 +2,10 @@
 #define MESSAGE_H
 
 #include <QGraphicsTextItem>
-#include <QFont>
 #include <QTimer>
+#include <QFont>
 #include "player.h"
+#include "general.h"
 
 class Message: public QGraphicsTextItem {
 private:
@@ -13,11 +14,12 @@ private:
 
 public:
     Message();
-    ~Message() {delete timer;};
-    void press_key_msg();
-    void ready_msg();
     void go_msg();
     void win_msg();
+    void ready_msg();
+    void press_key_msg();
+    void game_over_msg();
+    ~Message() {delete timer;};
 
 public slots:
     void blink();

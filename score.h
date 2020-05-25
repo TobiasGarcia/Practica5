@@ -2,19 +2,23 @@
 #define SCORE_H
 
 #include <QGraphicsTextItem>
-#include <QFont>
 #include <QFontDatabase>
+#include <QFont>
+#include "general.h"
 
 class Score: public QGraphicsTextItem {
 private:
-    int score = 0;
+    int score;
+
 public:
     Score();
     ~Score() {};
+
 public slots:
-    void increase_score(short points);
+    void final_score();
     void restart_score();
-    void win_score();
+    void increase_score(short points);
+
 };
 
 #endif // SCORE_H
