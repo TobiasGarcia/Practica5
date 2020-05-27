@@ -2,6 +2,7 @@
 #define PACMAN_H
 
 #include <QGraphicsScene>
+#include <QSoundEffect>
 #include "general.h"
 #include "player.h"
 #include "wall.h"
@@ -21,6 +22,8 @@ private:
     QGraphicsPixmapItem *lifes[3];
     Ghost *blinky, *pinky, *inky, *clyde;
     QPixmap *eyes, *scared_ghost, *lifes_scrpit;
+
+    QSoundEffect *lose_sound, *pop_sound, *scare_sound, *begin_sound;
 
     void setup_game();
     void restart_game();
