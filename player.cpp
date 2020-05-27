@@ -344,6 +344,7 @@ void Player::win_animation() {
     num_script = 1; update(); delay(150);
 
     for (short i = 0; i < 3; i++) {
+        eat_ghost_sound->play();
         for (num_script = 0; num_script < 3; num_script++) {
             update();
             delay(150);
