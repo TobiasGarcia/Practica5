@@ -165,17 +165,63 @@ void Player::stop(short x_wall, short y_wall) {
     short x_left = (x_wall - width), x_right = (x_wall + 25),
             y_up = (y_wall - height), y_down = (y_wall + 25);
 
-    if ((y() == y_up) and (x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
-    if ((y() == y_down) and (x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
+//    if ((y() == y_up) and (x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
+//    if ((y() == y_down) and (x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
 
-    if ((x() == x_left) and (y() != y_up) and (y() != y_down)) move_dir.at(3) = false;
-    if ((x() == x_right) and (y() != y_up) and (y() != y_down)) move_dir.at(1) = false;
+//    if ((x() == x_left) and (y() != y_up) and (y() != y_down)) move_dir.at(3) = false;
+//    if ((x() == x_right) and (y() != y_up) and (y() != y_down)) move_dir.at(1) = false;
+
+    if (y() == y_up) {
+        need_fit.at(1) = false;
+        need_fit.at(3) = false;
+        if (((x_left + 14) < x()) and (x() < (x_right - 14))) {
+            move_dir.at(2) = false;
+            need_fit.at(2) = false;
+        }
+    }
+    if (y() == y_down) {
+        need_fit.at(1) = false;
+        need_fit.at(3) = false;
+        if (((x_left + 14) < x()) and (x() < (x_right - 14))) {
+            move_dir.at(0) = false;
+            need_fit.at(0) = false;
+        }
+    }
+
+    if (x() == x_left) {
+        need_fit.at(0) = false;
+        need_fit.at(2) = false;
+        if (((y_up + 14) < y()) and (y() < (y_down - 14))) {
+            move_dir.at(3) = false;
+            need_fit.at(3) = false;
+        }
+    }
+    if (x() == x_right) {
+        need_fit.at(0) = false;
+        need_fit.at(2) = false;
+        if (((y_up + 14) < y()) and (y() < (y_down - 14))) {
+            move_dir.at(1) = false;
+            need_fit.at(1) = false;
+        }
+    }
+}
+
+void Player::fit_tile() {
+
+    short x_rem = (short(x()) - X_MAZE)%25, y_rem = (short(y()) - Y_MAZE)%25;
+
+    if (x_rem < 13) setPos(short(x()) - x_rem, y());
+    else setPos(short(x()) - x_rem + 25, y());
+
+    if (y_rem < 13) setPos(x(), short(y()) - y_rem);
+    else setPos(x(), short(y()) - y_rem + 25);
 }
 
 void Player::move() {
 
     if (freeze) return;
 
+    need_fit = pressed_dir;
     move_dir = pressed_dir;
 
     collisions = collidingItems(Qt::IntersectsItemBoundingRect);
@@ -188,7 +234,7 @@ void Player::move() {
         //Pero ésta última provoca una advertencia por parte de Qt, por lo cual
         //es preferible utilizar la variable intermedia item.
 
-        auto item = collisions.at(i);
+        QGraphicsItem *item = collisions.at(i);
         if (typeid(*item) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y());
         else if (typeid(*item) == typeid(Point)) {
 
@@ -272,27 +318,42 @@ void Player::move() {
     //es un error lógico, por lo cual lo dejé dentro de cada uno de ellos.
 
     if (move_dir.at(last_presesed)) {
-        setPos(x() + pixels*gap[last_presesed], y() + pixels*gap[(last_presesed + 1)%4]);
+
+        if (need_fit.at(last_presesed)) fit_tile();
+        else setPos(x() + pixels*gap[last_presesed], y() + pixels*gap[(last_presesed + 1)%4]);
+
         num_script = (num_script + 1)%3;
         dir = last_presesed;
     }
     else if (move_dir.at(0)) {
-        setPos(x(), y() - pixels);
+
+        if (need_fit.at(0)) fit_tile();
+        else setPos(x(), y() - pixels);
+
         num_script = (num_script + 1)%3;
         dir = 0;
     }
     else if (move_dir.at(1)) {
-        setPos(x() - pixels, y());
+
+        if (need_fit.at(1)) fit_tile();
+        else setPos(x() - pixels, y());
+
         num_script = (num_script + 1)%3;
         dir = 1;
     }
     else if (move_dir.at(2)) {
-        setPos(x(), y() + pixels);
+
+        if (need_fit.at(2)) fit_tile();
+        else setPos(x(), y() + pixels);
+
         num_script = (num_script + 1)%3;
         dir = 2;
     }
     else if (move_dir.at(3)) {
-        setPos(x() + pixels, y());
+
+        if (need_fit.at(3)) fit_tile();
+        else setPos(x() + pixels, y());
+
         num_script = (num_script + 1)%3;
         dir = 3;
     }

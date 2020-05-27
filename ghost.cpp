@@ -289,7 +289,7 @@ void Ghost::move() {
         //Pero ésta última provoca una advertencia por parte de Qt, por lo cual
         //es preferible utilizar la variable intermedia item.
 
-        auto item = collisions.at(i);
+        QGraphicsItem *item = collisions.at(i);
         if (typeid(*item) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y());
     }
 

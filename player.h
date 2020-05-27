@@ -45,9 +45,10 @@ private:
     bool tp, freeze;
     QTimer *move_timer;
     QList <QGraphicsItem*> collisions;
-    std::array<bool, 4> pressed_dir, move_dir;
+    std::array<bool, 4> pressed_dir, move_dir, need_fit;
     short pixels, last_presesed, dir, gap[4] = {0, -1, 0, 1};
 
+    void fit_tile();
     void stop(short x_wall, short y_wall);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
