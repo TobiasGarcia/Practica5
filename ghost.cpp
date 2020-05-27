@@ -203,6 +203,7 @@ void Ghost::scare() {
     state = 1;
     fit_tile();
     pixels = 2.5;
+    dir = (dir + 2)%4;
     scare_timer->start(7000);
 
     //Reflejamos el target con respecto al
@@ -239,6 +240,7 @@ void Ghost::normal_ghost() {
     fit_tile();
     pixels = 5;
     scare_timer->stop();
+    emit back_normal(id);
 }
 
 void Ghost::set_freeze(bool _freeze) {

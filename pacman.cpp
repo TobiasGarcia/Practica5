@@ -10,6 +10,15 @@ void Pacman::setup_game() {
 
     make_maze(X_MAZE, Y_MAZE);
 
+    lose_sound = new QSoundEffect;
+    lose_sound->setSource(QUrl("qrc:/sounds/resources/sounds/lose.wav"));
+
+    pop_sound = new QSoundEffect;
+    pop_sound->setSource(QUrl("qrc:/sounds/resources/sounds/pop.wav"));
+
+    begin_sound = new QSoundEffect;
+    begin_sound->setSource(QUrl("qrc:/sounds/resources/sounds/begin.wav"));
+
     eyes = new QPixmap[4];
     eyes[0] = QPixmap(":/images/resources/images/ghosts/eyesU.png");
     eyes[1] = QPixmap(":/images/resources/images/ghosts/eyesL.png");
@@ -98,6 +107,11 @@ void Pacman::create_characters() {
     connect(player, &Player::scare_ghosts, inky, &Ghost::scare);
     connect(player, &Player::scare_ghosts, clyde, &Ghost::scare);
 
+    connect(blinky, &Ghost::back_normal, player, &Player::normal_ghost);
+    connect(pinky, &Ghost::back_normal, player, &Player::normal_ghost);
+    connect(inky, &Ghost::back_normal, player, &Player::normal_ghost);
+    connect(clyde, &Ghost::back_normal, player, &Player::normal_ghost);
+
     connect(player, &Player::touched_ghost, this, &Pacman::to_lose);
     connect(player, &Player::no_points_left, this, &Pacman::to_win);
 }
@@ -172,6 +186,9 @@ Pacman::~Pacman() {
         delete[] eyes;
         delete[] scared_ghost;
         delete message;
+        delete lose_sound;
+        delete pop_sound;
+        delete begin_sound;
 
         for (short i = 0; i < 3; i++) delete lifes[i];
     }
@@ -193,12 +210,13 @@ void Pacman::begin_game() {
     clyde->setPos(X_MAZE + 275, Y_MAZE + 175);
 
     message->ready_msg();
-    delay(1000);
+    begin_sound->play();
+    delay(3700);
 
     message->go_msg();
-    set_freeze(false);
-    delay(1000);
+    delay(500);
 
+    set_freeze(false);
     removeItem(message);
 }
 
@@ -212,11 +230,13 @@ void Pacman::to_lose() {
     removeItem(inky);
     removeItem(clyde);
 
+    lose_sound->play();
     player->lose_animation();
     removeItem(player);
 
     lifes_left--;
     delay(700);
+    pop_sound->play();
     lifes[lifes_left]->setPixmap(lifes_scrpit[1]);
     delay(150);
     removeItem(lifes[lifes_left]);

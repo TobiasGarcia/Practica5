@@ -21,7 +21,7 @@ class Player: public QObject, public QGraphicsPixmapItem {
 
 private:
     bool is_playing;
-    short width, height, points_left;
+    short width, height, points_left, normal_ghosts;
 
     QRectF boundingRect() const;
 
@@ -30,7 +30,7 @@ public:
     Player();
     void initialize();
     void focusOutEvent(QFocusEvent *event);
-    ~Player() {delete move_timer; delete[] script;};
+    ~Player();
 
 signals:
     void begin();
@@ -87,6 +87,18 @@ public:
 
 public slots:
     void lose_animation();
+
+//-----------------------------------------------------------------------------------------
+//----------------------------------------SONIDOS------------------------------------------
+//-----------------------------------------------------------------------------------------
+
+private:
+    short eaten_id;
+    QSoundEffect *scare_sound, *eat_ghost_sound, *only_eyes_sound, *ghosts_walk_sound, *waka_sound;
+
+public slots:
+    void normal_ghost(short id);
+
 };
 
 #endif // PLAYER_H

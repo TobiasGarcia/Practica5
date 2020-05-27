@@ -44,4 +44,14 @@
         <file>resources/images/pacman/pacman13.png</file>
         <file>resources/images/pacman/pacman14.png</file>
     </qresource>
+    <qresource prefix="/sounds">
+        <file>resources/sounds/scare.wav</file>
+        <file>resources/sounds/lose.wav</file>
+        <file>resources/sounds/pop.wav</file>
+        <file>resources/sounds/eat_ghost.wav</file>
+        <file>resources/sounds/ghost_walk.wav</file>
+        <file>resources/sounds/only_eyes.wav</file>
+        <file>resources/sounds/begin.wav</file>
+        <file>resources/sounds/waka.wav</file>
+    </qresource>
 </RCC>

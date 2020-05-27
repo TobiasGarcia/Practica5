@@ -2,6 +2,7 @@
 #define GHOST_H
 
 #include <QGraphicsPixmapItem>
+#include <QSoundEffect>
 #include <QPainter>
 #include <QTimer>
 #include <array>
@@ -24,6 +25,7 @@ private:
 public:
     void initialize();
     short get_state() {return state;};
+    short get_id() {return id;};
     Ghost(QPixmap *_eyes, QPixmap *_scared_ghost, short _id);
     ~Ghost();
 
@@ -79,6 +81,13 @@ private:
 
 public slots:
     void animate_ghost() {sheet_bool = !sheet_bool;update();};
+
+//-----------------------------------------------------------------------------------------
+//----------------------------------------SONIDOS------------------------------------------
+//-----------------------------------------------------------------------------------------
+
+signals:
+    void back_normal(short id);
 
 };
 

@@ -19,8 +19,10 @@ void Player::initialize() {
 
     dir = 0;
     tp = false;
+    eaten_id = 4;
     freeze = true;
     last_presesed = 0;
+    normal_ghosts = 0;
 
     pressed_dir.fill(false);
     move_dir.fill(false);
@@ -39,6 +41,21 @@ Player::Player() {
     points_left = 150;
 
     pixels = 5;
+
+    scare_sound = new QSoundEffect;
+    scare_sound->setSource(QUrl("qrc:/sounds/resources/sounds/scare.wav"));
+
+    eat_ghost_sound = new QSoundEffect;
+    eat_ghost_sound->setSource(QUrl("qrc:/sounds/resources/sounds/eat_ghost.wav"));
+
+    only_eyes_sound = new QSoundEffect;
+    only_eyes_sound->setSource(QUrl("qrc:/sounds/resources/sounds/only_eyes.wav"));
+
+    ghosts_walk_sound = new QSoundEffect;
+    ghosts_walk_sound->setSource(QUrl("qrc:/sounds/resources/sounds/ghost_walk.wav"));
+
+    waka_sound = new QSoundEffect;
+    waka_sound->setSource(QUrl("qrc:/sounds/resources/sounds/waka.wav"));
 
     script = new QPixmap[15];
     script[0] = QPixmap(":/images/resources/images/pacman/pacman1.png");
@@ -65,6 +82,16 @@ Player::Player() {
     move_timer->start(1000/30); //30 fps
 }
 
+Player::~Player() {
+    delete move_timer;
+    delete[] script;
+    delete scare_sound;
+    delete only_eyes_sound;
+    delete eat_ghost_sound;
+    delete ghosts_walk_sound;
+    delete waka_sound;
+}
+
 //-----------------------------------------------------------------------------------------
 //---------------------------------MOVIMIENTO Y COLISIONES---------------------------------
 //-----------------------------------------------------------------------------------------
@@ -74,6 +101,8 @@ void Player::keyPressEvent(QKeyEvent *event) {
     if (!is_playing) {
         is_playing = true;
         emit begin();
+        ghosts_walk_sound->setLoopCount(QSoundEffect::Infinite);
+        ghosts_walk_sound->play();
         return;
     }
 
@@ -171,9 +200,15 @@ void Player::move() {
             //en éste caso bajar de QGraphicsItem* a Point*.
 
             Point *point = dynamic_cast<Point*>(item);
+
+            waka_sound->play();
+
             if (point->get_type() == 1) emit earn_point(10);
             else {
                 emit earn_point(50);
+                ghosts_walk_sound->setLoopCount(0);
+                scare_sound->setLoopCount(QSoundEffect::Infinite);
+                scare_sound->play();
                 emit scare_ghosts();
             }
 
@@ -182,6 +217,11 @@ void Player::move() {
 
             points_left--;
             if (points_left == 0) {
+
+                scare_sound->setLoopCount(0);
+                only_eyes_sound->setLoopCount(0);
+                ghosts_walk_sound->setLoopCount(0);
+
                 emit no_points_left();
                 return;
             }
@@ -199,9 +239,24 @@ void Player::move() {
 
             if (ghost->get_state() == 1) {
                 emit earn_point(200);
+
+                eaten_id = ghost->get_id();
+                eat_ghost_sound->play();
+
+                scare_sound->setLoopCount(0);
+                if (!(only_eyes_sound->isPlaying())) {
+                    only_eyes_sound->setLoopCount(QSoundEffect::Infinite);
+                    only_eyes_sound->play();
+                }
+
                 ghost->go_home();
             }
             else if (ghost->get_state() == 0) {
+
+                scare_sound->setLoopCount(0);
+                only_eyes_sound->setLoopCount(0);
+                ghosts_walk_sound->setLoopCount(0);
+
                 emit touched_ghost();
                 return;
             }
@@ -303,9 +358,35 @@ void Player::lose_animation() {
 
     for (num_script = 0; num_script < 14; num_script++) {
         update();
-        delay(150);
+        delay(100);
     }
 
     update();
     is_playing = false;
+}
+
+//-----------------------------------------------------------------------------------------
+//----------------------------------------SONIDOS------------------------------------------
+//-----------------------------------------------------------------------------------------
+
+void Player::normal_ghost(short id) {
+
+    normal_ghosts++;
+    if (normal_ghosts == 4) {
+
+        eaten_id = 4;
+        normal_ghosts = 0;
+
+        scare_sound->setLoopCount(0);
+        only_eyes_sound->setLoopCount(0);
+
+        ghosts_walk_sound->setLoopCount(QSoundEffect::Infinite);
+        ghosts_walk_sound->play();
+    }
+    else if (eaten_id == id) {
+        eaten_id = 4;
+        only_eyes_sound->setLoopCount(0);
+        scare_sound->setLoopCount(QSoundEffect::Infinite);
+        scare_sound->play();
+    }
 }
