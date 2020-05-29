@@ -11,6 +11,8 @@
 #include "point.h"
 #include "ghost.h"
 
+//Esta libreria está pensada para modelar a Pacman, el cual será controlado por el jugador.
+
 class Player: public QObject, public QGraphicsPixmapItem {
 
     Q_OBJECT

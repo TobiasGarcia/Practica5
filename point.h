@@ -4,6 +4,8 @@
 #include <QGraphicsPixmapItem>
 #include <QTimer>
 
+//Ésta clase modela los puntos colocados en el laberinto.
+
 class Point: public QObject, public QGraphicsPixmapItem {
 
     Q_OBJECT

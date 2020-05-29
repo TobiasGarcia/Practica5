@@ -38,6 +38,9 @@ Point::~Point() {
 }
 
 void Point::animate() {
+
+    //Éste slot es sólo para que los puntos grandes titilen.
+
     if (bool_point) {
         bool_point = false;
         setPixmap(*image2);

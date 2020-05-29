@@ -379,7 +379,7 @@ void Ghost::set_freeze(bool _freeze) {
 
 void Ghost::stop(short x_wall, short y_wall) {
 
-    //Colisión con paredes de 25 x 25 pixeles.
+    //Colisión con paredes de 26 x 26 pixeles a los ojos de las colisiones de Qt.
 
     //La documentació de éste método es análoga a la del método que lleva éste mismo nombre
     //pero en la clase Player, sólo que aquí no hace falta el detalle de "suavizar" las esquinas.

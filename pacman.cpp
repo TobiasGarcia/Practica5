@@ -295,6 +295,13 @@ void Pacman::to_lose() {
     player->lose_animation();
     removeItem(player);
 
+    //NOTA: Si el juego es cerrado en el momento en que transcurre un delay, los sonidos continuaran
+    //reproduciéndoce hasta que éste termine, pues el destructor está esperando que termine para
+    //proceder a librar la memoria empleada para almacenar los sonidos, por lo cual cuando se
+    //cierra el juego mientras se reproduce la animación de derrota del jugador, el sonido de
+    //la animación continuará reproduciéndoce hasta que termine, incluso así el juego se
+    //encuentre cerrado.
+
     lifes_left--;
     delay(700);
 
