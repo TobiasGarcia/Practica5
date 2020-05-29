@@ -5,7 +5,7 @@
 //-----------------------------------------------------------------------------------------
 
 QRectF Player::boundingRect() const {
-    return QRectF(-1, -1, 27, 27);
+    return QRectF(-1, -1, 27, 27);//21 x 21
 }
 
 void Player::focusOutEvent(QFocusEvent *event) {
@@ -34,9 +34,6 @@ void Player::initialize() {
 }
 
 Player::Player() {
-
-    width = 25;
-    height = 25;
 
     points_left = 150;
 
@@ -162,8 +159,8 @@ void Player::stop(short x_wall, short y_wall) {
 
     //Colisión con paredes de 25 x 25 pixeles.
 
-    short x_left = (x_wall - width), x_right = (x_wall + 25),
-            y_up = (y_wall - height), y_down = (y_wall + 25);
+    short x_left = (x_wall - 25), x_right = (x_wall + 25),
+            y_up = (y_wall - 25), y_down = (y_wall + 25);
 
 //    if ((y() == y_up) and (x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
 //    if ((y() == y_down) and (x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
@@ -385,7 +382,7 @@ void Player::move() {
 }
 
 //-----------------------------------------------------------------------------------------
-//----------------------------------------IMÁGENES-----------------------------------------
+//---------------------------------IMÁGENES Y ANIMACIONES----------------------------------
 //-----------------------------------------------------------------------------------------
 
 void Player::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {

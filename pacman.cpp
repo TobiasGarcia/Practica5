@@ -3,12 +3,26 @@
 Pacman::Pacman(short width_game, short height_game) {
 
     setSceneRect(0, 0, width_game, height_game);
+
+    //Notemos que todas las lineas del método setup_game() podrían haber sido colocadas aquí,
+    //pero no es una buena idea pues como podemos ver en pacman.h, la clase Pacman es una
+    //herencia de QGraphicsScene, por lo cual cuando se termina el juego, gane o pierda
+    //el jugador, limpiamos la escena con QGraphicsScene::clear() y debemos volver a
+    //reservar memoria para todos los objetos, pues QGraphicsScene::clear() libera
+    //la memoria utilizada, por lo cual la escena nunca es eliminada, luego es
+    //más cómodo colocar todas las reservas de memoria dinámica bajo un
+    //método, que en éste caso es setup_game().
+
     setup_game();
 }
 
 void Pacman::setup_game() {
 
+    //Construimos el laberinto.
+
     make_maze(X_MAZE, Y_MAZE);
+
+    //Cargamos los sonidos e imágenes del archivo de recursos.
 
     lose_sound = new QSoundEffect;
     lose_sound->setSource(QUrl("qrc:/sounds/resources/sounds/lose.wav"));
@@ -33,6 +47,8 @@ void Pacman::setup_game() {
     lifes_scrpit[0] = QPixmap(":/images/resources/images/pacman/pacman2.png");
     lifes_scrpit[0] = lifes_scrpit[0].transformed(QTransform().translate(-13, -13).rotate(90).translate(13, 13));
     lifes_scrpit[1] = QPixmap(":/images/resources/images/pacman/pacman14.png");
+
+    lifes = new QGraphicsPixmapItem*[3];
 
     lifes[0] = new QGraphicsPixmapItem;
     lifes[0]->setPixmap(lifes_scrpit[0]);
@@ -71,10 +87,14 @@ void Pacman::setup_game() {
     addItem(clyde->target);
 #endif
 
+    //El propósito de ésta variable será explicado en el método restart_game().
+
     delete_bool = true;
 }
 
 void Pacman::create_characters() {
+
+    //Reservamos memoria en el heap para los personajes.
 
     player = new Player;
     addItem(player);
@@ -93,6 +113,8 @@ void Pacman::create_characters() {
 
     clyde = new Ghost(eyes, scared_ghost, 3);
     addItem(clyde);
+
+    //Realizamos varias conexiones.
 
     connect(player, &Player::begin, this, &Pacman::begin_game);
     connect(player, &Player::earn_point, score, &Score::increase_score);
@@ -118,8 +140,20 @@ void Pacman::create_characters() {
 
 void Pacman::make_maze(short x_maze, short y_maze) {
 
-    //La forma en que están programados los fantasmas hace que sucedan cosas raras
-    //si se ponen callejones.
+    //Creamos el laberinto.
+
+    //La verdad me parece mejor implementar éste método con argumentos en lugar de escribir
+    //todo con las macros X_MAZE y Y_MAZE, porque así es más fácil de adaptar a un código
+    //diferente en caso de ser necesario.
+
+    //La matriz de enteros maze_info almacena la información del laberinto en forma de enteros,
+    //de tal forma que luego cuando sea recorrida, dependiendo del entero almacenado se colocará
+    //un item diferente en la escena, o en el caso de las paredes, el entero representará que
+    //imágen se le debe colocar.
+
+    //0 es para no colocar nada, 1 es para colocar un punto, 2 es para colocar uno de los puntos grandes,
+    //y el resto de enteros desde el 3 hasta el 27 son paredes, pero el entero difiere según la imágen
+    //que deba ser colocada.
 
     QGraphicsPixmapItem *cover_tp;
     short maze_info[21][19] = {{ 5,  3,  3,  3,  3,  3,  3,  3,  3, 10,  3,  3,  3,  3,  3,  3,  3,  3,  6},
@@ -148,18 +182,32 @@ void Pacman::make_maze(short x_maze, short y_maze) {
         for (short j = 0; j < 19; j++) {
             if (maze_info[i][j] == 1) addItem(new Point(x_maze + 11 + 25*j, y_maze + 11 + 25*i));
             else if (maze_info[i][j] == 2) addItem(new Point(x_maze + 11 + 25*j, y_maze + 11 + 25*i, 2));
+
+            //Utilizamos un else if para que en el caso de que el entero sea 0 no coloque nada.
+
             else if (maze_info[i][j]) addItem(new Wall(x_maze + 25*j, y_maze + 25*i, maze_info[i][j]));
         }
     }
+
+    //Añadimos paredes, pero sin imágen, alrededor de las baldosas de los costados para entrar por
+    //un lado y salir por el otro con el propósito de que el jugador no se pueda salir del laberinto
+    //en caso de entrar y presionar arriba o abajo.
 
     addItem(new Wall(x_maze - 25, y_maze + 200, 27));
     addItem(new Wall(x_maze - 50, y_maze + 225, 27));
     addItem(new Wall(x_maze - 25, y_maze + 250, 27));
 
+    //Lo siguiente no es una pared, es sólo un cuadro negro que se coloca justo encima de la baldosa
+    //donde se teleporta al jugador para que se vea un efecto de que desaparece por un lado y aparece
+    //por el otro de forma continua en lugar de súbita.
+
     cover_tp = new QGraphicsPixmapItem(QPixmap(":/images/resources/images/walls/empty.png"));
     cover_tp->setPos(x_maze - 25, y_maze + 225);
     cover_tp->setZValue(1);
     addItem(cover_tp);
+
+    //Las siguientes lineas hacen el análogo pero para el lado opuesto; pensé en colocarlo en un
+    //ciclo, pero no me pareció necesario pues sólo serian dos iteraciones.
 
     addItem(new Wall(x_maze + 475, y_maze + 200, 27));
     addItem(new Wall(x_maze + 500, y_maze + 225, 27));
@@ -170,31 +218,40 @@ void Pacman::make_maze(short x_maze, short y_maze) {
     cover_tp->setZValue(1);
     addItem(cover_tp);
 
-    //No se debe liberar la memoria de cover_tp aquí porque ya no aparece en la escena,
-    //esa reserva de memoria se libera cuando se cierra el juego y se elimina la escena.
+    //NOTA: No se debe liberar la memoria de cover_tp aquí porque ya no aparecería en la escena,
+    //esa reserva de memoria se libera cuando se gana, se pierde, o se cierra el juego, donde
+    //en cada caso la escena es eliminada.
 }
 
 Pacman::~Pacman() {
+
+    //El propósito de la variable delete_bool será explicado en el método restart_game().
+
     if (delete_bool) {
         delete player;
-        delete score;
         delete blinky;
         delete pinky;
         delete inky;
         delete clyde;
-        delete[] lifes_scrpit;
+        delete lifes[0];
+        delete lifes[1];
+        delete lifes[2];
         delete[] eyes;
+        delete[] lifes;
         delete[] scared_ghost;
+        delete[] lifes_scrpit;
+        delete score;
         delete message;
         delete lose_sound;
         delete pop_sound;
         delete begin_sound;
-
-        for (short i = 0; i < 3; i++) delete lifes[i];
     }
 }
 
 void Pacman::set_freeze(bool freeze) {
+
+    //Congelamos o descongelamos a todos los personajes.
+
     player->set_freeze(freeze);
     blinky->set_freeze(freeze);
     pinky->set_freeze(freeze);
@@ -203,6 +260,8 @@ void Pacman::set_freeze(bool freeze) {
 }
 
 void Pacman::begin_game() {
+
+    //Comenzamos el juego.
 
     blinky->setPos(X_MAZE + 175, Y_MAZE + 175);
     pinky->setPos(X_MAZE + 200, Y_MAZE + 175);
@@ -222,6 +281,8 @@ void Pacman::begin_game() {
 
 void Pacman::to_lose() {
 
+    //Éste método se ejecuta cuando el jugador pierde una vida.
+
     set_freeze(true);
     delay(1000);
 
@@ -236,6 +297,7 @@ void Pacman::to_lose() {
 
     lifes_left--;
     delay(700);
+
     pop_sound->play();
     lifes[lifes_left]->setPixmap(lifes_scrpit[1]);
     delay(150);
@@ -245,6 +307,9 @@ void Pacman::to_lose() {
 
     if (lifes_left == 0) {
 
+        //En caso de que lifes_left sea 0, es porque el jugador ya perdió
+        //las tres vidas, por lo cual es un game over.
+
         score->final_score();
 
         message->game_over_msg();
@@ -252,32 +317,35 @@ void Pacman::to_lose() {
 
         delay(5000);
         restart_game();
-        return;
     }
+    else {
+        player->initialize();
+        addItem(player);
 
-    player->initialize();
-    addItem(player);
+        player->setFlag(QGraphicsItem::ItemIsFocusable);
+        player->setFocus();
 
-    player->setFlag(QGraphicsItem::ItemIsFocusable);
-    player->setFocus();
+        blinky->initialize();
+        addItem(blinky);
 
-    blinky->initialize();
-    addItem(blinky);
+        pinky->initialize();
+        addItem(pinky);
 
-    pinky->initialize();
-    addItem(pinky);
+        inky->initialize();
+        addItem(inky);
 
-    inky->initialize();
-    addItem(inky);
+        clyde->initialize();
+        addItem(clyde);
 
-    clyde->initialize();
-    addItem(clyde);
-
-    message->press_key_msg();
-    addItem(message);
+        message->press_key_msg();
+        addItem(message);
+    }
 }
 
 void Pacman::to_win() {
+
+    //Éste método se ejecuta cuadno el jugador recolecta todos los puntos,
+    //es decir, gana el juego.
 
     set_freeze(true);
     delay(1000);
@@ -299,6 +367,13 @@ void Pacman::to_win() {
 }
 
 void Pacman::restart_game() {
+
+    //Cuando el juego se reinicia limpiamos la escena, lo cual hace que se libere toda la memoria
+    //dinámica reservada por los items, por lo cual, si cerramos el juego justo en este momento
+    //el programa crashearia pues llamaria al destructor que trataria de libarar todos los
+    //items que ya habían sido eliminados, sin embargo, para que esto no suceda utilziamos
+    //la variable delete_bool, la cual colocamos en false hasta que se vuelva a reservar
+    //toda la memoria de los items dentro de setup_game().
 
     QGraphicsScene::clear();
     delete_bool = false;

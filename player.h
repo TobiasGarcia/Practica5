@@ -21,7 +21,7 @@ class Player: public QObject, public QGraphicsPixmapItem {
 
 private:
     bool is_playing;
-    short width, height, points_left, normal_ghosts;
+    short points_left, normal_ghosts;
 
     QRectF boundingRect() const;
 
@@ -73,7 +73,7 @@ public slots:
     void move();
 
 //-----------------------------------------------------------------------------------------
-//----------------------------------------IMÁGENES-----------------------------------------
+//---------------------------------IMÁGENES Y ANIMACIONES----------------------------------
 //-----------------------------------------------------------------------------------------
 
 private:
