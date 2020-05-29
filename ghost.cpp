@@ -11,11 +11,11 @@ QRectF Ghost::boundingRect() const {
     //QGraphicsRectItem a QGraphicsPixmapItem, que dibujar un rectangulo añadia un pixel
     //de más, en realidad eran de 26 x 26, por lo cual me tocó colocar la imágen de
     //25 x 25 pero cambiar los bordes por 26 x 26, y tres pixeles extra para que
-    //hubiera una intersección entre el rectangulo del fantasma y la pared antes
+    //hubiera una intersección entre el rectángulo del fantasma y la pared antes
     //de que el fantasma la atravesase, de esta forma Qt logra detectar la
     //colisión en el momento justo en que necesito bloquear el movimiento,
-    //por lo cual al final quedo de 29 x 29 con el origen trasladado un
-    //pixel en la dirección negativa de cada eje.
+    //por lo cual al final los bordes quedaron de 29 x 29 con el origen
+    //trasladado un pixel en la dirección positiva de cada eje.
 
     return QRectF(-1, -1, 27, 27);
 }
@@ -24,16 +24,16 @@ void Ghost::initialize() {
 
     //Ésta función está diseñada con el propósito de reiniciar el fantasma cuando el jugador
     //pierde, notemos que es mejor utilizar esto a simplemetne eliminar el fantasma y volver
-    //a llamar al constructor, pues nos ahorramos volver a tener que reservar memoria para
+    //a llamar al constructor, pues nos ahorramos el volver a tener que reservar memoria para
     //las imágenes, reservar para los timers, y hacer las conexiones de las señales con los slots.
 
-    //La variable state representa en cual estado de tres se encuentra el fantasma, los estados
+    //La variable state representa en cuál estado de tres se encuentra el fantasma, los estados
     //son:
 
     //0: Normal, cuando el fantasma está persiguiendo a Pacman.
     //1: Asustado, cuando Pacman ha comido uno de los puntos grandes y los fantasmas se ponen
     //azules y éste puede comerlos.
-    //2: Ojos, cuando el fantasma ha sido comido por Pacman y sus ojos tiene que ir hacia la
+    //2: Ojos, cuando el fantasma ha sido comido por Pacman y sus ojos tienen que ir hacia la
     //puerta de la casa de los fantasmas para volver a su estado normal de perseguir a Pacman.
 
     state = 0;
@@ -48,8 +48,8 @@ void Ghost::initialize() {
 
     freeze = true;
 
-    //La variable sheet_bool sólo con el propósito de cambiar la sábana del fantasma para
-    //que se vea como si estuviera levitando por el laberinto.
+    //La variable sheet_bool es sólo con el propósito de cambiar la sábana del fantasma para
+    //que se vea como si estuviese levitando por el laberinto.
 
     sheet_bool = true;
 
@@ -83,7 +83,7 @@ Ghost::Ghost(QPixmap *_eyes, QPixmap *_scared_ghost, short _id) {
 
     //Como todos poseen los mismos ojos y la misma forma cuando están asustados,
     //es decir, cuando se ponen azul oscuro y el jugador los puede comer, éstas
-    //imágenes las cargamos desde el los métodos del juego como tal, y simplemente
+    //imágenes las cargamos desde los métodos del juego como tal, y simplemente
     //le pasamos la dirección de memoria donde están ubicadas.
 
     id = _id;
@@ -142,7 +142,7 @@ Ghost::~Ghost() {
 //---------------------------------MOVIMIENTO Y COLISIONES---------------------------------
 //-----------------------------------------------------------------------------------------
 
-//El movimiento de los fantasmas es sencillo, y está programado como en el pacman original
+//El movimiento de los fantasmas es sencillo, y está programado como en el Pacman original
 //según se explica en éste vídeo entre los minutos 1:55 y 12:50:
 
 //https://www.youtube.com/watch?v=ataGotQ7ir8&t=115s
@@ -151,12 +151,12 @@ Ghost::~Ghost() {
 //y la forma en que llegan a estos.
 
 //La idea consiste en ubicar un punto llamado target que será el lugar hacia donde tratará
-//de ir el fantasma, digo "tratará" pues este punto puede estar por fuera del laberinto.
+//de ir el fantasma, digo "tratará" pues éste punto puede estar por fuera del laberinto.
 //Para "llegar" hasta éste target, se utiliza el método move(), el cual decide que camino
 //tomar en una intersección según la posición del target; éste último método está diseñado
 //para que no ocurra ningún problema en caso de que el target esté por fuera del laberinto.
 
-//Los siguientes métodos _target() actualzan el target del fantasma dependiento de cual es,
+//Los siguientes métodos ._target() actualizan el target del fantasma dependiento de cual es,
 //según lo mencionado en el vídeo.
 
 void Ghost::blinky_target(short x_pac, short y_pac) {
@@ -232,9 +232,9 @@ void Ghost::update_target(short x_pac, short y_pac, short dir_pac) {
     //Su propósito es actualizar el target del fantasma en cuestión.
 
     //Notemos que si el fantasma en cuestión es Blinky, es decir, id = 0,
-    //emitimos la señal para actualizar el target de Inky, ya dentro del
-    //slot inky_target() decidimos si actualizar el target de Inky o no
-    //dependiendo de si está en el estado 0 o no.
+    //emitimos la señal para actualizar el target de Inky, y ya dentro del
+    //slot inky_target() decidimos si actualizar el target de Inky o no,
+    //dependiendo de si éste está en el estado 0 o no.
 
     //Para el resto de fantasmas primero verificamos que se encuentren en el
     //estado 0, que corresponde al estado en donde persiguen a Pacman.
@@ -289,7 +289,7 @@ void Ghost::choose_dir() {
     dir = min;
 
     //NOTA: El arreglo de bools move_dir indica en cual dirección se debe mover el fantasma,
-    //la cual es la única que esté en true.
+    //la cual es la única que se encuentra en true.
 }
 
 void Ghost::fit_tile() {
@@ -300,9 +300,8 @@ void Ghost::fit_tile() {
     //es análogo en el caso de y.
 
     //Esto es porque cuando hay cambios en la magnitud de la velocidad, como por
-    //ejemplo colocar el atributo pixels en 2.5, hay que asegurarnos que el fantasma
-    //éste dentro de una baldosa, o de lo contrario el fantasma comenzará a atravesar
-    //las paredes.
+    //ejemplo colocar el atributo pixels en 2.5, hay que asegurarnos de que el fantasma
+    //éste dentro de una baldosa, o de lo contrario éste comenzará a atravesar las paredes.
 
     short x_rem = (short(x()) - X_MAZE)%25, y_rem = (short(y()) - Y_MAZE)%25;
 
@@ -338,9 +337,9 @@ void Ghost::scare() {
 void Ghost::go_home() {
 
     //Éste slot se ejecuta cuando un fantasma asustado es comido por Pacman;
-    //lo que hace es colocar el estado en 2 para que sólo se muestren los
+    //lo que hace es colocarle el estado 2 para que sólo se muestren los
     //ojos del fantasma, aumentar la magnitud de su velocidad y colocar
-    //su objetivo en la puerta de la casa de los fantasmas.
+    //su target en la puerta de la casa de los fantasmas.
 
     state = 2;
     fit_tile();
@@ -359,9 +358,9 @@ void Ghost::normal_ghost() {
 
     //Éste slot se ejecuta cuando el fantasma llega a la puerta de la casa de los fantasmas
     //en el estado 2, es decir, cuando sólo se ven sus ojos luego de ser comido por Pacman;
-    //lo que haces es devolver el estado a 0, es decir, al estado normal, colcar la
+    //lo que hace es devolverle el estado 0, es decir, el estado normal, colcar la
     //magnitud de la velocidad de nuevo en 5 pixeles por cada 50 milisegundos
-    //(100 pixeles por segundo) y emitir la seña back_normal para que la
+    //(100 pixeles por segundo) y emitir la señal back_normal(), para que la
     //procese el slot normal_ghost de la clase Player.
 
     state = 0;
@@ -406,7 +405,8 @@ void Ghost::move() {
 
     if ((state == 2) and ((x() == (X_MAZE + 225)) and (y() == (Y_MAZE + 175)))) normal_ghost();
 
-    //Si estamos en una de las baldosas laterales por donde se entra y se sale por el otro lado.
+    //Si estamos en una de las baldosas laterales por donde se entra y se sale por el otro lado,
+    //teleportamos al fantasma.
 
     if ((x() == (X_MAZE + 475)) and (y() == (Y_MAZE + 225))) setPos(X_MAZE - 25, y());
     else if ((x() == (X_MAZE - 25)) and (y() == (Y_MAZE + 225))) setPos(X_MAZE + 475, y());
@@ -418,16 +418,16 @@ void Ghost::move() {
     move_dir.fill(true);
 
     //NOTA: El arreglo de bools move_dir indica en cual dirección se debe mover el fantasma,
-    //la cual es la única que esté en true.
+    //la cual es la única que está en true.
 
-    //Filtamos para colocar en false las direcciones donde hay paredes.
+    //Filtramos para colocar en false las direcciones donde hay paredes.
 
     collisions = collidingItems(Qt::IntersectsItemBoundingRect);
     for (short i = 0; i < collisions.size(); i++) {
 
         //La sentencia del siguiente condicional funciona de la misma forma que la siguiente:
 
-        //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions[i]->x(), collisions[i]->y());
+        //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y());
 
         //Pero ésta última provoca una advertencia por parte de Qt, por lo cual
         //es preferible utilizar la variable intermedia item.

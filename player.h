@@ -11,7 +11,7 @@
 #include "point.h"
 #include "ghost.h"
 
-//Esta libreria está pensada para modelar a Pacman, el cual será controlado por el jugador.
+//Ésta clase está pensada para modelar a Pacman, el cual será controlado por el jugador.
 
 class Player: public QObject, public QGraphicsPixmapItem {
 
@@ -55,7 +55,7 @@ private:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
 
-    //NOTA: En los arrays pressed_dir y move_dir, la correspondencia entre las
+    //NOTA: En los arrays pressed_dir, move_dir y need_fit, la correspondencia entre las
     //direcciones y los índices es la siguiente:
 
     //0: Arriba

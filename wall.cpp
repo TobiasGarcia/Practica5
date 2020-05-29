@@ -6,7 +6,7 @@ QRectF Wall::boundingRect() const {
 
 Wall::Wall(short x, short y, short type) {
 
-    //Éste montón de condicionales son utilizados para decidir cual imágen colocarle a la pared de entre
+    //Éste montón de condicionales son utilizados para decidir cuál imágen colocarle a la pared de entre
     //las 25 posibles.
 
     //NOTA: En el archivo de recursos sólo hay 9 imágenes diferentes, el resto de las 25 se logran

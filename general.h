@@ -7,11 +7,11 @@
 #include <QTime>
 
 //Esta libreria es para colocar tres macros que serán usados dentro de varias de
-//las demás librerias, además de definir dos funciones que también son usadas en
-//varias implementaciones, pero que no poseen una caracteristica particular para
-//incluirlas como métodos de alguna de las clases.
+//las demás clases, además de definir dos funciones que también son usadas en
+//varias implementaciones, pero que no poseen una caracteristica particular
+//como para incluirlas como métodos de alguna de las clases.
 
-//Éste primer macro es utilziado para activar la visualización de los targets* de
+//Éste primer macro es utilizado para activar la visualización de los targets* de
 //los fantamas, es decir, ver por medio de una marca el lugar hacia donde se
 //quiere mover cada fantasma. El valor de 0 es para desactivarlo y el de 1
 //para activarlo.

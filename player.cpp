@@ -16,8 +16,9 @@ QRectF Player::boundingRect() const {
 void Player::focusOutEvent(QFocusEvent *event) {
 
     //Éste método es utilizado para que si se minimiza la pestaña, o se clickea en
-    //cualquier otra parte de la escena no se pierda el focus del item Pacman y
-    //cuando se presionen las teclas sean procesadas correctamente.
+    //cualquier otra parte de la escena no se pierda el focus del item que representa
+    //a Pacman, y de ésta forma, cuando las teclas sean presionadas, éstas sean
+    //procesadas correctamente.
 
     Q_UNUSED(event);
     setFocus();
@@ -134,7 +135,7 @@ void Player::keyPressEvent(QKeyEvent *event) {
         return;
     }
 
-    //En el arreglo de bools pressed_dir se colocará en true las teclas que el jugador éste presionando
+    //En el arreglo de bools pressed_dir se colocará en true las teclas que el jugador esté presionando
     //actualmente, mientras que en last_presesed se almacenará la última tecla presionada; esto es con
     //el propósito de poder hacer que cuando el jugador se mueva en una dirección, por ejemplo a la
     //derecha, y mantenga presionada al mismo tiempo la tecla para ir en otra dirección, hacia
@@ -193,10 +194,10 @@ void Player::stop(short x_wall, short y_wall) {
     //NOTA: Ésta sólo es una figura ilustrativa, en realidad los fantasmas y el jugador
     //poseen dimensiones de 29 x 29 pixeles a los ojos de las colisiones de Qt.
 
-    //Las variables x_left, x_right, y_left e y_right son calculadas de esta manera
+    //Las variables x_left, x_right, y_down y y_up son calculadas de esta manera
     //para que cubran un rectangulo mayor que sólo los pixeles de la pared.
-    //Ésto es realizado con el propósito de compensar el hecho de que
-    //la posición del jugador o del fantasma es representada por el
+    //Ésto se realiza con el propósito de compensar el hecho de que
+    //la posición del jugador, o del fantasma, es representada por el
     //pixel que se encuentra en la esquina superior izquierda de
     //su figura.
 
@@ -209,12 +210,12 @@ void Player::stop(short x_wall, short y_wall) {
     //a cabo la idea anteriormente mencionada, la que es explica justo antes de la figura
     //ilustrativa de la pared, sin embargo, ésta idea causaba que el hecho de girar en una
     //intersección fuera muy complicado para el jugador, pues al ser el movimiento tan preciso,
-    //para poder girar había que colocarse en el pixel exacto y en caso de no aplicar la opción
-    //mencionada dentro del método keyPressEvent(), se podía tornar verdaderamente difícil el
-    //girar por una intersección, por lo cual, para resolver éste problema decidí agreagar
-    //algo así como un "suavizador" de esquinas.
+    //para poder girar había que colocarse en el pixel exacto, y en caso de no aplicar la opción
+    //para girar más fácilmente mencionada dentro del método keyPressEvent(), se podía tornar
+    //verdaderamente difícil el girar por una intersección, por lo cual, para resolver éste
+    //problema decidí agregar algo así como un "suavizador" de esquinas.
 
-    //Ésto de suavizar las esquinas simplemetne consiste en que el movimiento es bloqueado de forma
+    //Ésto de "suavizar" las esquinas simplemetne consiste en que el movimiento es bloqueado de forma
     //similar a como se explicó antes, si la intersección era por una esquina no se bloqueba en ninguna
     //dirección, pero ahora se diseñó para que si la intersección se realiza por unos cuantos pixeles
     //cerca de la esquina, 14 pixeles más específicamente, en lugar de bloquear el movimiento se llama
@@ -298,7 +299,7 @@ void Player::fit_tile() {
 
 void Player::move() {
 
-    //Éste método rige el movimiento del jugador basandose en las teclas que tiene presionadas, la última
+    //Éste método rige el movimiento del jugador basándose en las teclas que tiene presionadas, la última
     //que presionó, y la posición respecto a los demás items de la escena, como los puntos, paredes y fantasmas.
 
     //Si freeze es true nos limitamos a retornar.
@@ -320,7 +321,7 @@ void Player::move() {
 
         //La sentencia del siguiente condicional funciona de la misma forma que la siguiente:
 
-        //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions[i]->x(), collisions[i]->y());
+        //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y());
 
         //Pero ésta última provoca una advertencia por parte de Qt, por lo cual
         //es preferible utilizar la variable intermedia item.
@@ -365,7 +366,7 @@ void Player::move() {
             points_left--;
             if (points_left == 0) {
 
-                //Si no restan puntos en el laberinto, es porque el jugador a ganado el juego, luego
+                //Si no restan puntos en el laberinto, es porque el jugador ha ganado el juego, luego
                 //detenemos todos los sonidos que se estén reproduciendo y emitimos la señal para
                 //ganar el juego.
 
@@ -410,7 +411,7 @@ void Player::move() {
                 ghost->go_home();
             }
 
-            //En caso de que el fantasma éste en su estado normal, detenemos todos los sonidos
+            //En caso de que el fantasma esté en su estado normal, detenemos todos los sonidos
             //y emitimos la señal que ejecuta el slot to_lose(), ya que el jugador ha perdido
             //una vida.
 
@@ -430,10 +431,10 @@ void Player::move() {
     //moverse o no, y en caso afirmativo si llamar al método fit_tile() o en qué direcció mover a Pacman.
 
     //NOTA: La línea num_script = (num_script + 1)%3 debe ir dentro de los condicionales para que sólo suceda
-    //cuando hay movimiento, si lo dejamos por fuera siempre sucedería, aunque no sería un problema pues como
-    //no hay movimiento, el método paint() no se ejecutaría y el pacman no cambiaria de script cuando
-    //permaneciese estático, sin embargo, me parece que dejarlo por fuera de los condicionles, aunque
-    //no haga una diferencia aparente, es un error lógico, por lo cual lo decidí dejar dentro.
+    //cuando hay movimiento, si la dejamos por fuera siempre sucedería, aunque no sería un problema pues como
+    //no hay movimiento, el método paint() no se ejecutaría y Pacman no cambiaría de script cuando permaneciese
+    //estático, sin embargo, me parece que dejarla por fuera de los condicionles, aunque no haga una diferencia
+    //aparente, es un error lógico, por lo cual la decidí dejar dentro.
 
     if (move_dir.at(last_presesed)) {
 
@@ -497,7 +498,7 @@ void Player::move() {
     }
 
     //Finalmente, emitimos la señal new_target() para actualizar el target de los fantasmas
-    //según las coordenadas de Pacman y la dirección en que se desea mover el jugador,
+    //según las coordenadas de Pacman, y la dirección en que se desea mover el jugador,
     //es decir, last_presesed.
 
     emit new_target(x(), y(), last_presesed);

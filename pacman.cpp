@@ -198,7 +198,7 @@ void Pacman::make_maze(short x_maze, short y_maze) {
     addItem(new Wall(x_maze - 25, y_maze + 250, 27));
 
     //Lo siguiente no es una pared, es sólo un cuadro negro que se coloca justo encima de la baldosa
-    //donde se teleporta al jugador para que se vea un efecto de que desaparece por un lado y aparece
+    //donde se teleporta al jugador, para que se vea un efecto de que desaparece por un lado y aparece
     //por el otro de forma continua en lugar de súbita.
 
     cover_tp = new QGraphicsPixmapItem(QPixmap(":/images/resources/images/walls/empty.png"));
@@ -219,8 +219,8 @@ void Pacman::make_maze(short x_maze, short y_maze) {
     addItem(cover_tp);
 
     //NOTA: No se debe liberar la memoria de cover_tp aquí porque ya no aparecería en la escena,
-    //esa reserva de memoria se libera cuando se gana, se pierde, o se cierra el juego, donde
-    //en cada caso la escena es eliminada.
+    //esa reserva de memoria se libera cuando se gana o se pierde, donde en cada caso la escena
+    //es limpiada mediante QGraphicsScene::clear(), o cuando se cierra el juego.
 }
 
 Pacman::~Pacman() {
@@ -314,7 +314,7 @@ void Pacman::to_lose() {
 
     if (lifes_left == 0) {
 
-        //En caso de que lifes_left sea 0, es porque el jugador ya perdió
+        //En el caso en el que lifes_left es 0, significa que el jugador ya perdió
         //las tres vidas, por lo cual es un game over.
 
         score->final_score();
@@ -376,7 +376,7 @@ void Pacman::to_win() {
 void Pacman::restart_game() {
 
     //Cuando el juego se reinicia limpiamos la escena, lo cual hace que se libere toda la memoria
-    //dinámica reservada por los items, por lo cual, si cerramos el juego justo en este momento
+    //dinámica reservada por los items, por lo cual, si cerramos el juego justo en este momento,
     //el programa crashearia pues llamaria al destructor que trataria de libarar todos los
     //items que ya habían sido eliminados, sin embargo, para que esto no suceda utilziamos
     //la variable delete_bool, la cual colocamos en false hasta que se vuelva a reservar
