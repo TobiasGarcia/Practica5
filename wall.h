@@ -3,6 +3,8 @@
 
 #include <QGraphicsPixmapItem>
 
+//Ésta clase modela las paredes del laberinto.
+
 class Wall: public QGraphicsPixmapItem {
 private:
     QPixmap *image;

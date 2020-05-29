@@ -7,6 +7,9 @@
 #include "player.h"
 #include "general.h"
 
+//Ésta clase es utilizada para colocar los mensajes que salen en el juego,
+//como el de "Press any key to start", "Game Over", etc.
+
 class Message: public QGraphicsTextItem {
 private:
     QTimer *timer;

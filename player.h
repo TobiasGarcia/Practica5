@@ -11,6 +11,8 @@
 #include "point.h"
 #include "ghost.h"
 
+//Ésta clase está pensada para modelar a Pacman, el cual será controlado por el jugador.
+
 class Player: public QObject, public QGraphicsPixmapItem {
 
     Q_OBJECT
@@ -21,7 +23,7 @@ class Player: public QObject, public QGraphicsPixmapItem {
 
 private:
     bool is_playing;
-    short width, height, points_left, normal_ghosts;
+    short points_left, normal_ghosts;
 
     QRectF boundingRect() const;
 
@@ -45,14 +47,15 @@ private:
     bool tp, freeze;
     QTimer *move_timer;
     QList <QGraphicsItem*> collisions;
-    std::array<bool, 4> pressed_dir, move_dir;
+    std::array<bool, 4> pressed_dir, move_dir, need_fit;
     short pixels, last_presesed, dir, gap[4] = {0, -1, 0, 1};
 
+    void fit_tile();
     void stop(short x_wall, short y_wall);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
 
-    //NOTA: En los arrays pressed_dir y move_dir, la correspondencia entre las
+    //NOTA: En los arrays pressed_dir, move_dir y need_fit, la correspondencia entre las
     //direcciones y los índices es la siguiente:
 
     //0: Arriba
@@ -72,7 +75,7 @@ public slots:
     void move();
 
 //-----------------------------------------------------------------------------------------
-//----------------------------------------IMÁGENES-----------------------------------------
+//---------------------------------IMÁGENES Y ANIMACIONES----------------------------------
 //-----------------------------------------------------------------------------------------
 
 private:

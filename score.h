@@ -6,6 +6,8 @@
 #include <QFont>
 #include "general.h"
 
+//Ésta clase modela el marcador de puntos.
+
 class Score: public QGraphicsTextItem {
 private:
     int score;

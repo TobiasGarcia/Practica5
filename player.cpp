@@ -5,15 +5,32 @@
 //-----------------------------------------------------------------------------------------
 
 QRectF Player::boundingRect() const {
+
+    //Aquí sucede lo mismo que en el caso de boundingRect() de la clase Ghost,
+    //pero la diferencia radica en que desde el principio, para que la imágen
+    //de Pacman no se viera muy grande, sería de 21 x 21 pixeles.
+
     return QRectF(-1, -1, 27, 27);
 }
 
 void Player::focusOutEvent(QFocusEvent *event) {
+
+    //Éste método es utilizado para que si se minimiza la pestaña, o se clickea en
+    //cualquier otra parte de la escena no se pierda el focus del item que representa
+    //a Pacman, y de ésta forma, cuando las teclas sean presionadas, éstas sean
+    //procesadas correctamente.
+
     Q_UNUSED(event);
     setFocus();
 }
 
 void Player::initialize() {
+
+    //Ésta función se ejecuta cuando se crea al jugador con new, es decir, en el
+    //constructor, o cuando se vuelve a colocar al jugador en el punto de inicio
+    //luego de que haya sido tocado por un fantasma. Su propósito es reiniciar
+    //algunas variables que poseen valores especificos cuando se comienza el
+    //juego.
 
     is_playing = false;
 
@@ -35,10 +52,14 @@ void Player::initialize() {
 
 Player::Player() {
 
-    width = 25;
-    height = 25;
+    //Reservamos memoria para posteriormente cargar imágenes y sonidos.
 
-    points_left = 150;
+    //Estos son los puntos (grandes y pequeños) que debe recoger Pacman para ganar el juego,
+    //por lo cual, para que fuese más fácil estudiar el comportamiento cuando se gana el
+    //juego, para no tener que recoger todos los puntos, basta colocar esta variable
+    //en un número menor, como 5 por ejemplo.
+
+    points_left = 150; //150
 
     pixels = 5;
 
@@ -98,13 +119,28 @@ Player::~Player() {
 
 void Player::keyPressEvent(QKeyEvent *event) {
 
+    //Éste slot procesa las teclas presionadas por el usuario.
+
+    //Notemos que si se presiona una tecla e is_playing se encuentra en false,
+    //emitimos la señal para comenzar el juego.
+
     if (!is_playing) {
+
         is_playing = true;
         emit begin();
+
         ghosts_walk_sound->setLoopCount(QSoundEffect::Infinite);
         ghosts_walk_sound->play();
+
         return;
     }
+
+    //En el arreglo de bools pressed_dir se colocará en true las teclas que el jugador esté presionando
+    //actualmente, mientras que en last_presesed se almacenará la última tecla presionada; esto es con
+    //el propósito de poder hacer que cuando el jugador se mueva en una dirección, por ejemplo a la
+    //derecha, y mantenga presionada al mismo tiempo la tecla para ir en otra dirección, hacia
+    //arriba por ejemplo, Pacman tomará el primer giro hacía arriba que encuentre; éste hecho
+    //también es cierto en las demás direcciones.
 
     if ((event->key() == Qt::Key_Up) and !event->isAutoRepeat()) {
         pressed_dir.at(0) = true;
@@ -128,6 +164,8 @@ void Player::keyPressEvent(QKeyEvent *event) {
 
 void Player::keyReleaseEvent(QKeyEvent *event) {
 
+    //Éste slot procesa las teclas que son soltadas por el usuario.
+
     if ((event->key() == Qt::Key_Up) and !event->isAutoRepeat()) pressed_dir.at(0) = false;
     if ((event->key() == Qt::Key_Left) and !event->isAutoRepeat()) pressed_dir.at(1) = false;
     if ((event->key() == Qt::Key_Down) and !event->isAutoRepeat()) pressed_dir.at(2) = false;
@@ -139,43 +177,143 @@ void Player::stop(short x_wall, short y_wall) {
     //La forma en que se bloquea el movimiento según las colisiones consiste en que si
     //la intersección entre el objeto (jugador o fantasma) y la pared es un único pixel,
     //es decir, la intersección se dio en una de las esquina (en las Os de la figura),
-    //el movimiento no se bloquea en ninguna dirección; por otra parte si la
+    //el movimiento no se bloquea en ninguna dirección; por otra parte, si la
     //intersección es de más de un pixel, es decir, hay una parte que
-    //intersecta uno de los ■s de la figura, el movimiento se
+    //intersecta uno de los ■s de la figura, el movimiento se bloquea
     //dependiendo del lado por donde se presentó la colisión.
 
-    //O ■ ■ ■ O
-    //■       ■
-    //■       ■
-    //■       ■
-    //O ■ ■ ■ O
+    //O ■ ■ ■ ■ ■ ■ O
+    //■             ■
+    //■             ■
+    //■             ■
+    //■             ■
+    //■             ■
+    //■             ■
+    //O ■ ■ ■ ■ ■ ■ O
 
     //NOTA: Ésta sólo es una figura ilustrativa, en realidad los fantasmas y el jugador
-    //poseen dimensiones de 25 x 25 pixeles.
+    //poseen dimensiones de 29 x 29 pixeles a los ojos de las colisiones de Qt.
 
-    //Las variables x_left, x_right, y_left e y_right son calculadas de esta manera
+    //Las variables x_left, x_right, y_down y y_up son calculadas de esta manera
     //para que cubran un rectangulo mayor que sólo los pixeles de la pared.
-    //Ésto es realizado con el propósito de compensar el hecho de que
-    //la posición del jugador o del fantasma es representada por el
+    //Ésto se realiza con el propósito de compensar el hecho de que
+    //la posición del jugador, o del fantasma, es representada por el
     //pixel que se encuentra en la esquina superior izquierda de
-    //su imagen.
+    //su figura.
 
-    //Colisión con paredes de 25 x 25 pixeles.
+    //Colisión con paredes de 26 x 26 pixeles a los ojos de las colisiones de Qt.
 
-    short x_left = (x_wall - width), x_right = (x_wall + 25),
-            y_up = (y_wall - height), y_down = (y_wall + 25);
+    short x_left = (x_wall - 25), x_right = (x_wall + 25),
+            y_up = (y_wall - 25), y_down = (y_wall + 25);
 
-    if ((y() == y_up) and (x() != x_left) and (x() != x_right)) move_dir.at(2) = false;
-    if ((y() == y_down) and (x() != x_left) and (x() != x_right)) move_dir.at(0) = false;
+    //Es fácil ver que en la implementación de éste método para la clase Ghost se lleva
+    //a cabo la idea anteriormente mencionada, la que es explica justo antes de la figura
+    //ilustrativa de la pared, sin embargo, ésta idea causaba que el hecho de girar en una
+    //intersección fuera muy complicado para el jugador, pues al ser el movimiento tan preciso,
+    //para poder girar había que colocarse en el pixel exacto, y en caso de no aplicar la opción
+    //para girar más fácilmente mencionada dentro del método keyPressEvent(), se podía tornar
+    //verdaderamente difícil el girar por una intersección, por lo cual, para resolver éste
+    //problema decidí agregar algo así como un "suavizador" de esquinas.
 
-    if ((x() == x_left) and (y() != y_up) and (y() != y_down)) move_dir.at(3) = false;
-    if ((x() == x_right) and (y() != y_up) and (y() != y_down)) move_dir.at(1) = false;
+    //Ésto de "suavizar" las esquinas simplemetne consiste en que el movimiento es bloqueado de forma
+    //similar a como se explicó antes, si la intersección era por una esquina no se bloqueba en ninguna
+    //dirección, pero ahora se diseñó para que si la intersección se realiza por unos cuantos pixeles
+    //cerca de la esquina, 14 pixeles más específicamente, en lugar de bloquear el movimiento se llama
+    //al método fit_tile() para que coloqué a Pacman en el pixel exacto para poder girar con facilidad.
+
+    //Una representación de la idea anteriormente mencionada podría ser la siguiente:
+
+    //O % % ■ ■ % % O
+    //%             %
+    //%             %
+    //■             ■
+    //■             ■
+    //%             %
+    //%             %
+    //O % % ■ ■ % % O
+
+    //Donde si la intersección se da en una de las Os el movimiento no se bloquea, si la intersección
+    //toca alguno de los ■s el movimiento se bloquea en la dirección por donde se presentó la colisión,
+    //y si la colisión toca alguno de los %s Pacman es colocado en la baldosa adecuada para que pueda girar.
+
+    //NOTA 1: De nuevo la figura sólo es ilustrativa.
+    //NOTA 2: Ésta sólo es una explicación básica del procedimiento utilizado para "suavizar" las esquinas,
+    //en realidad habían varios problemas que presentaba el implementar éste método así como es explicada;
+    //naturalmente resolví éstos problemas, sin embargo, la forma final que tomó el algoritmo que rige el
+    //movimiento del jugador, parece un poco extraña a primera vista, pero esto es debido a que es el
+    //resultado de la toma de múltiples decisiones de diseño respecto a los problemas que se iban
+    //presentando durante la implementación, por lo cual se me hace difícil el explicar aquí todas
+    //esas decisiones, no obstante la escensia tras éste algoritmo es plasmada en la explicación
+    //básica que se brindó hace un momento.
+
+    if (y() == y_up) {
+        need_fit.at(1) = false;
+        need_fit.at(3) = false;
+        if (((x_left + 14) < x()) and (x() < (x_right - 14))) {
+            move_dir.at(2) = false;
+            need_fit.at(2) = false;
+        }
+    }
+    if (y() == y_down) {
+        need_fit.at(1) = false;
+        need_fit.at(3) = false;
+        if (((x_left + 14) < x()) and (x() < (x_right - 14))) {
+            move_dir.at(0) = false;
+            need_fit.at(0) = false;
+        }
+    }
+
+    if (x() == x_left) {
+        need_fit.at(0) = false;
+        need_fit.at(2) = false;
+        if (((y_up + 14) < y()) and (y() < (y_down - 14))) {
+            move_dir.at(3) = false;
+            need_fit.at(3) = false;
+        }
+    }
+    if (x() == x_right) {
+        need_fit.at(0) = false;
+        need_fit.at(2) = false;
+        if (((y_up + 14) < y()) and (y() < (y_down - 14))) {
+            move_dir.at(1) = false;
+            need_fit.at(1) = false;
+        }
+    }
+}
+
+void Player::fit_tile() {
+
+    //Éste método lo que hace es que coloca a Pacman en una baldosa, es decir,
+    //aproxima su posición en x al multiplo de 25 más cercano (porque las baldosas
+    //son de 25 x 25) pero antes de hacerlo le resta la posición en x del laberinto;
+    //es análogo en el caso de y.
+
+    short x_rem = (short(x()) - X_MAZE)%25, y_rem = (short(y()) - Y_MAZE)%25;
+
+    if (x_rem < 13) setPos(short(x()) - x_rem, y());
+    else setPos(short(x()) - x_rem + 25, y());
+
+    if (y_rem < 13) setPos(x(), short(y()) - y_rem);
+    else setPos(x(), short(y()) - y_rem + 25);
 }
 
 void Player::move() {
 
+    //Éste método rige el movimiento del jugador basándose en las teclas que tiene presionadas, la última
+    //que presionó, y la posición respecto a los demás items de la escena, como los puntos, paredes y fantasmas.
+
+    //Si freeze es true nos limitamos a retornar.
+
     if (freeze) return;
 
+    //Copiamos las teclas que el usuario está presionando en los arreglos need_fit y move_dir.
+
+    //NOTA: El arreglo de bools need_fit es utilizado para implementar el algoritmo de movimiento que se mencionó
+    //anteriormente. Si el jugador desea moverse en una dirección y ésta está en true dentro de need_fit,
+    //significa que en lugar de moverse, Pacman será colocado en la baldosa adecuada para que pueda
+    //girar sin problemas en la dirección deseada por el usuario.
+
+    need_fit = pressed_dir;
     move_dir = pressed_dir;
 
     collisions = collidingItems(Qt::IntersectsItemBoundingRect);
@@ -183,12 +321,12 @@ void Player::move() {
 
         //La sentencia del siguiente condicional funciona de la misma forma que la siguiente:
 
-        //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions[i]->x(), collisions[i]->y());
+        //if (typeid(*(collisions[i])) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y());
 
         //Pero ésta última provoca una advertencia por parte de Qt, por lo cual
         //es preferible utilizar la variable intermedia item.
 
-        auto item = collisions.at(i);
+        QGraphicsItem *item = collisions.at(i);
         if (typeid(*item) == typeid(Wall)) stop(collisions.at(i)->x(), collisions.at(i)->y());
         else if (typeid(*item) == typeid(Point)) {
 
@@ -196,19 +334,29 @@ void Player::move() {
 
             //Point *point = dynamic_cast<Point*>(item);
 
-            //Es utilizada para poder bajar en la jerarquía de las clases,
+            //Es utilizada para poder bajar en la jerarquía de clases,
             //en éste caso bajar de QGraphicsItem* a Point*.
 
             Point *point = dynamic_cast<Point*>(item);
 
             waka_sound->play();
 
+            //Los puntos pequeños equivalen a 10 puntos en el marcador, mientras que los puntos
+            //grandes equivalen a 50.
+
             if (point->get_type() == 1) emit earn_point(10);
             else {
                 emit earn_point(50);
+
+                //Si Pacman come un punto grande, detenemos el sonido de los fantasmas,
+                //comenzamos con el de los fantasmas asustados, y emitimos la señal
+                //correspondiente.
+
                 ghosts_walk_sound->setLoopCount(0);
+
                 scare_sound->setLoopCount(QSoundEffect::Infinite);
                 scare_sound->play();
+
                 emit scare_ghosts();
             }
 
@@ -217,6 +365,10 @@ void Player::move() {
 
             points_left--;
             if (points_left == 0) {
+
+                //Si no restan puntos en el laberinto, es porque el jugador ha ganado el juego, luego
+                //detenemos todos los sonidos que se estén reproduciendo y emitimos la señal para
+                //ganar el juego.
 
                 scare_sound->setLoopCount(0);
                 only_eyes_sound->setLoopCount(0);
@@ -238,7 +390,14 @@ void Player::move() {
             Ghost *ghost = dynamic_cast<Ghost*>(item);
 
             if (ghost->get_state() == 1) {
+
+                //Si Pacman toca un fantasma que se encuentra asustado, gana 200 puntos.
+
                 emit earn_point(200);
+
+                //La variable eaten_id almacena la id del último fantasma que se comió Pacman,
+                //esto es para que no se detenga el sonido de los ojos volviendo a la casa de
+                //los fantasmas hasta que llegue el último fantasma comido.
 
                 eaten_id = ghost->get_id();
                 eat_ghost_sound->play();
@@ -251,6 +410,11 @@ void Player::move() {
 
                 ghost->go_home();
             }
+
+            //En caso de que el fantasma esté en su estado normal, detenemos todos los sonidos
+            //y emitimos la señal que ejecuta el slot to_lose(), ya que el jugador ha perdido
+            //una vida.
+
             else if (ghost->get_state() == 0) {
 
                 scare_sound->setLoopCount(0);
@@ -263,49 +427,64 @@ void Player::move() {
         }
     }
 
-    //La línea num_script = (num_script + 1)%3 debe ir dentro de los condicionales
-    //para que sólo suceda cuando hay movimiento, si lo dejamos por fuera siempre
-    //sucedería, aunque no sería un problema pues como no hay movimiento el
-    //método paint() no se ejecutaría y el pacman no cambiaria de script
-    //cuando permaneciese estático, sin embargo me parece que dejarlo por
-    //fuera de los condicionles, aunque no haga una diferencia aparente,
-    //es un error lógico, por lo cual lo dejé dentro de cada uno de ellos.
+    //Luego de procesar las colisiones, basándonos en la información obtenida decidimos si Pacman debe
+    //moverse o no, y en caso afirmativo si llamar al método fit_tile() o en qué direcció mover a Pacman.
+
+    //NOTA: La línea num_script = (num_script + 1)%3 debe ir dentro de los condicionales para que sólo suceda
+    //cuando hay movimiento, si la dejamos por fuera siempre sucedería, aunque no sería un problema pues como
+    //no hay movimiento, el método paint() no se ejecutaría y Pacman no cambiaría de script cuando permaneciese
+    //estático, sin embargo, me parece que dejarla por fuera de los condicionles, aunque no haga una diferencia
+    //aparente, es un error lógico, por lo cual la decidí dejar dentro.
 
     if (move_dir.at(last_presesed)) {
-        setPos(x() + pixels*gap[last_presesed], y() + pixels*gap[(last_presesed + 1)%4]);
+
+        //Primero verificamos si nos podemos mover en la última dirección presionada.
+
+        if (need_fit.at(last_presesed)) fit_tile();
+        else setPos(x() + pixels*gap[last_presesed], y() + pixels*gap[(last_presesed + 1)%4]);
+
         num_script = (num_script + 1)%3;
         dir = last_presesed;
     }
+
+    //O en caso contrario procedemos a verificar en cual de las 4 direcciones se encuentra primero
+    //un true, esto precedencia entre las direcciones sólo es tenida en cuenta al presionar varias
+    //direcciones justo estando en el pixel exacto para poder girar en varias direcciones en una
+    //intersección, lo cual no es común que suceda, por lo tanto esa prevalencia por defecto de
+    //las direcciones casi nunca es tenida en cuenta.
+
     else if (move_dir.at(0)) {
-        setPos(x(), y() - pixels);
+
+        if (need_fit.at(0)) fit_tile();
+        else setPos(x(), y() - pixels);
+
         num_script = (num_script + 1)%3;
         dir = 0;
     }
     else if (move_dir.at(1)) {
-        setPos(x() - pixels, y());
+
+        if (need_fit.at(1)) fit_tile();
+        else setPos(x() - pixels, y());
+
         num_script = (num_script + 1)%3;
         dir = 1;
     }
     else if (move_dir.at(2)) {
-        setPos(x(), y() + pixels);
+
+        if (need_fit.at(2)) fit_tile();
+        else setPos(x(), y() + pixels);
+
         num_script = (num_script + 1)%3;
         dir = 2;
     }
     else if (move_dir.at(3)) {
-        setPos(x() + pixels, y());
+
+        if (need_fit.at(3)) fit_tile();
+        else setPos(x() + pixels, y());
+
         num_script = (num_script + 1)%3;
         dir = 3;
     }
-
-    //NOTA: Como el movimiento es tan preciso, al momento de girar por una esquina
-    //o tomar otro camino en una intersección, hay que estar en el pixel exacto
-    //o de lo contrario no se podrá girar. Esto hacía que el juego fuera un
-    //poco difícil, pero para solucionarlo programé que cuando se va en
-    //una dirección, por ejemplo a la derecha, y se mantiene presionada
-    //al mismo tiempo la tecla para ir en otra dirección, hacia arriba
-    //por ejemplo, el personaje tomará el primer giro hacía arriba
-    //que encuentre; el procedimiento es análogo en las
-    //demás direcciones.
 
     //Esto es del teleport de los costados.
 
@@ -318,16 +497,20 @@ void Player::move() {
         tp = true;
     }
 
-    //Enviamos la dirección hacia donde quiere ir el jugador.
+    //Finalmente, emitimos la señal new_target() para actualizar el target de los fantasmas
+    //según las coordenadas de Pacman, y la dirección en que se desea mover el jugador,
+    //es decir, last_presesed.
 
     emit new_target(x(), y(), last_presesed);
 }
 
 //-----------------------------------------------------------------------------------------
-//----------------------------------------IMÁGENES-----------------------------------------
+//---------------------------------IMÁGENES Y ANIMACIONES----------------------------------
 //-----------------------------------------------------------------------------------------
 
 void Player::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+
+    //Dibujamos el script correspondiente según num_script.
 
     Q_UNUSED(option);
     Q_UNUSED(widget);
@@ -339,6 +522,8 @@ void Player::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
 }
 
 void Player::win_animation() {
+
+    //Ejecutamos la animación que se presenta al ganar el juego.
 
     dir = 3;
     num_script = 1; update(); delay(150);
@@ -357,6 +542,15 @@ void Player::win_animation() {
 
 void Player::lose_animation() {
 
+    //Ejecutamos la animación de derrota del jugador.
+
+    //NOTA: Si el juego es cerrado en el momento en que transcurre un delay, los sonidos continuaran
+    //reproduciéndoce hasta que éste termine, pues el destructor está esperando que termine para
+    //proceder a librar la memoria empleada para almacenar los sonidos, por lo cual cuando se
+    //cierra el juego mientras se reproduce la animación de derrota del jugador, el sonido de
+    //la animación continuará reproduciéndoce hasta que termine, incluso así el juego se
+    //encuentre cerrado.
+
     for (num_script = 0; num_script < 14; num_script++) {
         update();
         delay(100);
@@ -371,6 +565,9 @@ void Player::lose_animation() {
 //-----------------------------------------------------------------------------------------
 
 void Player::normal_ghost(short id) {
+
+    //Éste método es sólo para saber cuando detener los sonidos de scare_sound u only_eyes_sound,
+    //y volver a reproducir el sondio ghosts_walk_sound.
 
     normal_ghosts++;
     if (normal_ghosts == 4) {

@@ -1,6 +1,12 @@
 #include "general.h"
 
 void delay(short mili) {
+
+    //Ésta función marca un delay de una duración de mili milisegundos. Éste código lo
+    //tuve que copiar de internet porque utiliza herramientas de las cuales desconozco
+    //el funcionamiento, sin embargo está hecho para generar un delay sin interrumpir el
+    //procesamiento de eventos y señales, como por ejemplo las animaciones.
+
     QTime sleep_time = QTime::currentTime().addMSecs(mili);
     while (QTime::currentTime() < sleep_time) QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 }

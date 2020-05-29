@@ -7,6 +7,8 @@ Message::Message() {
     setDefaultTextColor(Qt::yellow);
     setFont(QFont("arcade normal", 12));
 
+    //El slot blink() es solo para hacer que titile el mensaje.
+
     connect(timer, &QTimer::timeout, this, &Message::blink);
     press_key_msg();
 }

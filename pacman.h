@@ -11,18 +11,19 @@
 #include "ghost.h"
 #include "message.h"
 
+//Ésta clase modela el juego como tal.
+
 class Pacman: public QGraphicsScene {
 private:
 
     Score *score;
     Player *player;
-    bool delete_bool;
-    short lifes_left;
     Message *message;
-    QGraphicsPixmapItem *lifes[3];
+    short lifes_left;
+    bool delete_bool;
+    QGraphicsPixmapItem **lifes;
     Ghost *blinky, *pinky, *inky, *clyde;
     QPixmap *eyes, *scared_ghost, *lifes_scrpit;
-
     QSoundEffect *lose_sound, *pop_sound, *scare_sound, *begin_sound;
 
     void setup_game();

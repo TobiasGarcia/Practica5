@@ -9,6 +9,8 @@
 #include "wall.h"
 #include "general.h"
 
+//Ésta clase es utilizada para modelar los fantasmas del juego.
+
 class Ghost: public QObject, public QGraphicsPixmapItem {
 
     Q_OBJECT
@@ -18,14 +20,14 @@ class Ghost: public QObject, public QGraphicsPixmapItem {
 //-----------------------------------------------------------------------------------------
 
 private:
-    short width, height, state, id;
+    short state, id;
 
     QRectF boundingRect() const;
 
 public:
     void initialize();
-    short get_state() {return state;};
     short get_id() {return id;};
+    short get_state() {return state;};
     Ghost(QPixmap *_eyes, QPixmap *_scared_ghost, short _id);
     ~Ghost();
 
@@ -69,7 +71,7 @@ signals:
     void blinky_pos(short x_pac, short y_pac, short x_blin, short y_blin, short dir_pac);
 
 //-----------------------------------------------------------------------------------------
-//----------------------------------------IMÁGENES-----------------------------------------
+//---------------------------------IMÁGENES Y ANIMACIONES----------------------------------
 //-----------------------------------------------------------------------------------------
 
 private:
@@ -80,7 +82,7 @@ private:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 public slots:
-    void animate_ghost() {sheet_bool = !sheet_bool;update();};
+    void animate_ghost() {sheet_bool = !sheet_bool; update();};
 
 //-----------------------------------------------------------------------------------------
 //----------------------------------------SONIDOS------------------------------------------
